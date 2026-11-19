@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: Caption; src: url(/fonts/caption.otf); font-weight: 800; }
+  html, body { margin: 0; background: #000; overflow: hidden; }
+  #c, #o { position: absolute; left: 0; top: 0; display: block; }
+</style>
+<script src="/node_modules/topojson-client/dist/topojson-client.min.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "/node_modules/three/build/three.module.js",
+  "three/addons/": "/node_modules/three/examples/jsm/",
+  "kit": "/kit/kit.js"
+} }
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<canvas id="o"></canvas>
+<script type="module">
+  import * as THREE from 'three';
+  const q = new URLSearchParams(location.search);
+  const width = +q.get('w'), height = +q.get('h');
+  const canvas = document.getElementById('c'), overlay = document.getElementById('o');
+  for (const el of [canvas, overlay]) { el.width = width; el.height = height; el.style.width = width + 'px'; el.style.height = height + 'px'; }
+  const ctx = overlay.getContext('2d');
+  try {
+    await document.fonts.load('800 40px Caption').catch(() => {});
+    const mod = await import('/scene/' + q.get('scene'));
+    const scene = await mod.setup({ THREE, canvas, width, height });
+    const captions = mod.captions || [];      // [{t0, t1, text}]
+    const style = Object.assign({ size: 0.062, y: 0.66, color: '#ffffff', stroke: '#000000', font: 'Caption, Inter, sans-serif' }, mod.captionStyle || {});
+    window.__duration = mod.duration;
+    window.__fps = mod.fps;
+    window.renderFrame = async (t) => {
+      await scene.render(t);
+      ctx.clearRect(0, 0, width, height);
+      const cap = captions.find(c => t >= c.t0 && t < c.t1);
+      if (cap && !style.off) {
+        const px = Math.round(style.size * width);
+        ctx.font = `800 ${px}px ${style.font}`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.lineJoin = 'round'; ctx.lineWidth = px * 0.16; ctx.strokeStyle = style.stroke;
+        // pop-in: scale up during the first 80 ms of each caption
+        const k = Math.min(1, (t - cap.t0) / 0.08), s = 0.85 + 0.15 * k;
+        ctx.save(); ctx.translate(width / 2, height * style.y); ctx.scale(s, s);
+        ctx.strokeText(cap.text, 0, 0); ctx.fillStyle = style.color; ctx.fillText(cap.text, 0, 0);
+        ctx.restore();
+      }
+    };
+    window.__ready = true;
+  } catch (e) {
+    window.__error = String(e && e.stack || e);
+  }
+</script>
+</body>
+</html>

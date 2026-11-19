@@ -1,0 +1,1 @@
+{ "name": "voiceover-to-video", "owner": { "name": "harisaimanikanta" }, "description": "Voiceover → one-take Three.js Short", "plugins": [ { "name": "voiceover-to-video", "source": "./", "description": "Voiceover + script → one-take Three.js explainer Short" } ] }

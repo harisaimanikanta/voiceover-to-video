@@ -1,0 +1,1 @@
+{ "name": "voiceover-to-video", "version": "1.0.0", "description": "Voiceover + script → one-take Three.js explainer Short (1080x1920): forced alignment, portal transitions on pauses, IK cartoon cast, particles, captions, QA, render.", "author": { "name": "harisaimanikanta" }, "license": "MIT" }
