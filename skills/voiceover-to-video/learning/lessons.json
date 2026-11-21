@@ -210,9 +210,10 @@
     "rule": "Every hero surface has albedo variation, a normal map and a roughness map; no bare one-colour materials on hero props",
     "source": "user",
     "check": null,
-    "status": "open",
+    "status": "enforced",
     "hits": 1,
-    "history": []
+    "history": [],
+    "where": "kit/look.js soft() micro-normal materials"
   },
   {
     "id": "L014",
@@ -226,9 +227,10 @@
     "rule": "Every frame has foreground, midground subject and dressed background; review.py \"empty\" flags must be zero",
     "source": "user",
     "check": null,
-    "status": "open",
+    "status": "enforced",
     "hits": 1,
-    "history": []
+    "history": [],
+    "where": "kit/props.js cozyRoom/lab/street presets + review.py empty check"
   },
   {
     "id": "L015",
@@ -242,9 +244,10 @@
     "rule": "Key + rim on every character, at least one motivated practical per set; review.py \"flat\" flags must be zero",
     "source": "user",
     "check": null,
-    "status": "open",
+    "status": "enforced",
     "hits": 1,
-    "history": []
+    "history": [],
+    "where": "kit/look.js mood() + faceRig()"
   },
   {
     "id": "L016",
@@ -258,9 +261,10 @@
     "rule": "Always produce and show a polished storyboard sheet before the full render; follow a user storyboard panel by panel when given",
     "source": "user",
     "check": null,
-    "status": "open",
+    "status": "enforced",
     "hits": 1,
-    "history": []
+    "history": [],
+    "where": "scripts/storyboard.py + SKILL.md step 5 approval gate"
   },
   {
     "id": "L017",
@@ -273,6 +277,56 @@
     "fix": "Score every area after each run; the bar ratchets up; weakest area gets effort first next time",
     "rule": "Every run must beat the last run in its weakest area and fall below the bar in none",
     "source": "user",
+    "check": null,
+    "status": "open",
+    "hits": 1,
+    "history": []
+  },
+  {
+    "id": "L018",
+    "date": "2026-11-21",
+    "last_seen": "2026-11-21",
+    "area": "composition",
+    "title": "Brutalist theme too harsh to watch",
+    "symptom": "Heavy brutalist sets pulled focus; viewer could not focus on the visuals",
+    "cause": "Style chosen for mood, not readability",
+    "fix": "Default style is polished rounded 3D cartoon (look.js/toon.js/props.js)",
+    "rule": "Default to the polished 3D cartoon look; brutalist only if the user asks",
+    "source": "user",
+    "check": null,
+    "status": "enforced",
+    "hits": 1,
+    "history": [],
+    "where": "SKILL.md default style + kit/look.js, toon.js, props.js"
+  },
+  {
+    "id": "L019",
+    "date": "2026-11-21",
+    "last_seen": "2026-11-21",
+    "area": "character",
+    "title": "Faces must carry emotion",
+    "symptom": "Faces were simple dots and curves; no emotion on eyes, nose or mouth",
+    "cause": "Primitive cartoon head with swap-in mouths",
+    "fix": "Sculpted head + eyes with irises and lids + brows + lips/teeth/tongue + 14 blended emotions + lip-sync",
+    "rule": "Every line gets a matching emotion on the face (eyes, brows, mouth) plus posture; characters lip-sync when speaking",
+    "source": "user",
+    "check": null,
+    "status": "enforced",
+    "hits": 1,
+    "history": [],
+    "where": "kit/toon.js v3 face rig, EMOTIONS, speech()"
+  },
+  {
+    "id": "L020",
+    "date": "2026-11-21",
+    "last_seen": "2026-11-21",
+    "area": "character",
+    "title": "Coat sized for old body",
+    "symptom": "Lab coat poked above the shoulders like a tall cylinder after body change",
+    "cause": "Clothing profiles hard-coded to old proportions",
+    "fix": "Refit coat profile to the new torso",
+    "rule": "After any body change, render every outfit (coat, tie, glasses) and check it fits",
+    "source": "self",
     "check": null,
     "status": "open",
     "hits": 1,

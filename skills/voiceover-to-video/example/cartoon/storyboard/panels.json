@@ -1,0 +1,57 @@
+[
+ {
+  "t": 1.25,
+  "range": [
+   0.0,
+   2.5
+  ],
+  "vo": "Meet Sam.",
+  "visual": "Warm study at golden hour: window shaft, bookshelf, rug, dust in the light. Sam smiles and talks to us",
+  "camera": "Slow dolly in from a wide establishing angle",
+  "transition": "(continuous)"
+ },
+ {
+  "t": 3.3,
+  "range": [
+   2.5,
+   4.1
+  ],
+  "vo": "Hmm...",
+  "visual": "Sam squints, one brow up, eyes drift up-right: thinking",
+  "camera": "Dolly continues, arcing toward his left",
+  "transition": "(continuous)"
+ },
+ {
+  "t": 5.05,
+  "range": [
+   4.1,
+   6.0
+  ],
+  "vo": "Wait, WHAT?",
+  "visual": "Eyes wide, brows shoot up, jaw drops; hand flies up beside his head",
+  "camera": "Push into a medium shot",
+  "transition": "(continuous)"
+ },
+ {
+  "t": 7.0,
+  "range": [
+   6.0,
+   8.0
+  ],
+  "vo": "Oh no...",
+  "visual": "Brows knit up in the middle, lips tighten; hand rubs the top of his head",
+  "camera": "Medium close-up, drifting right",
+  "transition": "(continuous)"
+ },
+ {
+  "t": 9.0,
+  "range": [
+   8.0,
+   10.0
+  ],
+  "vo": "It worked!",
+  "visual": "Big open laugh, cheeks up, both arms thrown in the air",
+  "camera": "Arc across his face to a hero angle",
+  "transition": "end"
+ }
+]

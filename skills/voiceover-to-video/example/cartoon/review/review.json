@@ -1,0 +1,16 @@
+{
+ "video": "out/demo540.mp4",
+ "summary": {
+  "duration": 9.75,
+  "lum_mean": 0.4578,
+  "contrast_mean": 0.1769,
+  "sat_mean": 0.633,
+  "sharp_median": 8.7802,
+  "detail_mean": 0.0804,
+  "flagged_seconds": 0,
+  "flat_seconds": 0,
+  "cuts": 0
+ },
+ "flag_counts": {},
+ "flags": []
+}

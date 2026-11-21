@@ -1,12 +1,17 @@
 ---
 name: voiceover-to-video
-description: Turn a voiceover (mp3/wav) + its script into a finished vertical 1080x1920 explainer Short rendered with Three.js - one continuous camera take with no cuts, scene changes through "portals" on the narrator's pauses, camera accents on stressed words, consistent cartoon cast with IK hands, particles, word-synced captions, automated blank-frame QA. Use when the user gives a voiceover/audio (optionally with script text) and wants the video made.
+description: Turn a voiceover (mp3/wav) + its script into a finished vertical 1080x1920 Short in a polished 3D feature-animation cartoon style rendered with Three.js - sculpted characters with expressive emotional faces and lip-sync, cinematic mood lighting, densely dressed sets, one continuous camera take, portal transitions on the narrator's pauses, word-synced captions, a polished storyboard sheet for approval (or faithful following of the user's storyboard), automated QA and a self-improving lessons memory. Use when the user gives a voiceover/audio (optionally with script text) and wants the video made.
 argument-hint: "<voice.mp3> [script.txt]"
 ---
 
 # Voiceover → Video (one-take Three.js Short)
 
-Skill folder: `${CLAUDE_SKILL_DIR}`. Worked example (87.7 s, 22 environments): `example/` (scene.js + sets*.js + TREATMENT-v2.md + voiceover.mp3).
+Skill folder: `${CLAUDE_SKILL_DIR}`.
+
+**Default style: polished 3D feature-animation cartoon** (not brutalist). Rounded, sculpted characters with expressive faces
+(glossy eyes with irises and lids, brows, lips, teeth, 14 emotions, lip-sync). Warm cinematic mood lighting with a key, rim, practical
+lights and haze. Densely dressed rounded sets. Reference: `example/cartoon/` (scene.js, TREATMENT.md, storyboard sheet, demo.mp4).
+Build with `kit/look.js` (mood, faceRig, soft materials), `kit/toon.js` (cast), `kit/props.js` (cozyRoom/lab/street + props). Worked example (87.7 s, 22 environments): `example/` (scene.js + sets*.js + TREATMENT-v2.md + voiceover.mp3).
 Kit API and gotchas: `references/kit-api.md` (+ `kit/fx.js` particles/beams/camera helpers, `kit/toon.js` cartoon cast with `reach()` IK).
 
 ## Setup (ask first, once)
@@ -41,13 +46,20 @@ runs.jsonl = scorecard of every past video; bar.json = the quality floor, which 
 3. **Treatment first** (`<workdir>/TREATMENT.md`, same table format as `example/TREATMENT-v2.md`): for every line → what we SEE (literal + creative
    metaphor), camera move, and the portal used at the next pause (window, lens, door gap, liquid, mouth, screen, paper, gold, gas…).
    Show it to the user and wait for approval when they asked to review; otherwise continue.
-4. **Build `<workdir>/scene.js`** by adapting `example/scene.js`: copy needed sets from `example/sets*.js`, keep its structure
+4. **Build `<workdir>/scene.js`** from `example/cartoon/scene.js` (look + cast + acting); for multi-environment portal structure, borrow from `example/scene.js`: copy needed sets from `example/sets*.js`, keep its structure
    (SEG list of environments, PORTALS = [time, halfWidth, fillColour, zoom] at pauses, ACCENTS = stressed-word times, captions from `lines.json`).
-5. **Stills check:** `node ${CLAUDE_SKILL_DIR}/scripts/render.mjs scene.js --preview --still t1 --still t2 …` (one per segment). View them; fix framing.
-6. **QA:** `node …/render.mjs scene.js --width 270 --height 480 --qa 0.25 --qa-ignore "<portal t:w,…>"` must print `QA OK`.
-7. **Gate + render:** `learn.py gate <workdir>` → `bash ${CLAUDE_SKILL_DIR}/scripts/render-chunks.sh scene.js voice.mp3 final.mp4`
+5. **Storyboard sheet (approval gate):** `python3 ${CLAUDE_SKILL_DIR}/scripts/storyboard.py scene.js <workdir> --title "…"` renders
+   one real frame per treatment row and lays out a polished sheet (numbered panels, timecodes, camera, narration, what we see,
+   transitions). Look at every panel first and fix weak ones. Then show it to the user and wait for approval before the full render.
+   **Following a user's storyboard:** `python3 ${CLAUDE_SKILL_DIR}/scripts/split-storyboard.py board.png --out <workdir>/board` → look at every panel;
+   write `<workdir>/storyboard-follow.md` (panel → beat time, framing/angle, subject and pose, emotion, props, palette from board.json);
+   make the treatment follow it panel by panel. Then render our sheet with the same numbering and compare side by side. Every panel must match in composition,
+   subject, emotion and colour, rebuilt in our polished 3D cartoon style (not traced).
+6. **Stills check:** `node ${CLAUDE_SKILL_DIR}/scripts/render.mjs scene.js --preview --still t1 --still t2 …` (one per segment). View them; fix framing.
+7. **QA:** `node …/render.mjs scene.js --width 270 --height 480 --qa 0.25 --qa-ignore "<portal t:w,…>"` must print `QA OK`.
+8. **Gate + render:** `learn.py gate <workdir>` → `bash ${CLAUDE_SKILL_DIR}/scripts/render-chunks.sh scene.js voice.mp3 final.mp4`
    (resumable 10 s chunks at 720×1280, ~1.6 s/frame on CPU, run in the background; concatenates, upscales to 1080×1920, muxes the voice, yuv420p).
-8. **Post-mortem** (Learning loop above), fix anything below bar, then deliver with the scorecard and what improved since the last run.
+9. **Post-mortem** (Learning loop above), fix anything below bar, then deliver with the scorecard and what improved since the last run.
 
 ## Rules (learned the hard way; the live list is `learn.py brief`)
 - **One take, zero cuts; the camera never stops** (always a move + `drift()`); scene switches only inside a portal fill at a pause.
@@ -57,4 +69,7 @@ runs.jsonl = scorecard of every past video; bar.json = the quality floor, which 
 - **Camera safety:** never inside characters/walls (stills from each segment), never parent the camera to a scene, avoid stray full-height walls.
 - Saturated grade (sat ~1.25, con ~1.08) is on by default; captions 1–3 words from `lines.json`.
 - Be honest: stylised cartoon characters, not photoreal humans.
+- **Acting:** every line has an emotion (`toon.face`) that changes on the meaning, lip-sync (`speech`) while a character talks, matching `posture`,
+  eyes on what matters, hands busy (`reach`/`grip`). Faces are the story: hold medium close-ups on emotional beats, with the head in the upper third and headroom.
+- **Look:** `mood()` + `faceRig()` on every set, all materials via `soft()`, sets dressed with `props.js` (foreground, midground and background), dust in light beams.
 - Walks use `toon.walkDist(metresTravelled)` so feet never slide.
