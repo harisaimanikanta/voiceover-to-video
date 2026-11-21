@@ -112,6 +112,8 @@ export function makeToon({ skin = '#f1c4a0', shirt = '#7aa2e0', pants = '#5b6170
     /** walking cycle at phase t (call after rest) */
     walk(t, speed = 6, a = 1) { const s = Math.sin(t * speed); J.hipL.rotation.x = 0.45 * s * a; J.hipR.rotation.x = -0.45 * s * a; J.kneeL.rotation.x = 0.5 * Math.max(0, -s) * a; J.kneeR.rotation.x = 0.5 * Math.max(0, s) * a;
       J.shoulderL.rotation.x = -0.35 * s * a; J.shoulderR.rotation.x = 0.35 * s * a; J.pelvis.position.y = 0.92 + Math.abs(s) * 0.02; },
+    /** distance-driven walk (lesson L005: no foot sliding): pass metres travelled so far; one step per `stride` metres */
+    walkDist(dist, stride = 0.7, a = 1) { api.walk(dist / stride * Math.PI, 1, a); },
     /** parent a prop to a hand socket ('L'|'R'); offset/rotation in the wrist frame */
     hold(obj, side = 'R', pos = [0, -0.07, 0.05], rot = [0, 0, 0]) { J['wrist' + side].add(obj); obj.position.set(...pos); obj.rotation.set(...rot); return obj; },
     /**

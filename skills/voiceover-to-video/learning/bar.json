@@ -1,0 +1,7 @@
+{
+  "auto": {
+    "flagged_seconds_max": 10,
+    "flat_seconds_max": 5
+  },
+  "judged": {}
+}
