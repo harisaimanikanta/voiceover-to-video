@@ -133,10 +133,10 @@ export async function setup({ canvas, width, height }) {
           sparkle.points.visible = end && t > 100.3; sparkle.points.position.copy(L(H.kit.position, V(0.5, 1.5, 0.8), prog(t, 100.3, 103.8)));
           if (!end) {
             const sk = V(-1.0, 1.67, -2.43), danHead = dan.headWorld();
-            if (t < 3.8) { const k = easeInOut(prog(t, 0.2, 3.6)); pos = L(V(-0.95, 1.68, -1.6), V(0.95, 1.55, 1.75), k); at = L(sk, danHead.clone().add(V(-0.35, -0.15, 0)), easeInOut(prog(t, 0.6, 3.4))); fov = lerp(30, 38, k); }
-            else if (t < 7.7) { const k = easeInOut(prog(t, 3.8, 7.6)); const a = lerp(0.35, -0.3, k); pos = V(0.35 + Math.sin(a) * 2.2, 1.5, -0.85 + Math.cos(a) * 2.2); at = L(danHead.clone().add(V(0, -0.2, 0)), V(-0.35, 1.55, -1.6), 0.35); }
+            if (t < 3.8) { const k = easeInOut(prog(t, 0.2, 3.6)); pos = L(V(-0.95, 1.68, -1.6), V(0.35 + Math.sin(0.35) * 2.2, 1.5, -0.85 + Math.cos(0.35) * 2.2), k); at = L(sk, danHead.clone().add(V(-0.35, -0.15, 0)), easeInOut(prog(t, 0.6, 3.4))); fov = lerp(30, 38, k); }
+            else if (t < 7.7) { const k = easeInOut(prog(t, 3.8, 7.6)); const a = lerp(0.35, -0.3, k); pos = V(0.35 + Math.sin(a) * 2.2, 1.5, -0.85 + Math.cos(a) * 2.2); at = L(danHead.clone().add(V(-0.35, -0.15, 0)), L(danHead.clone().add(V(0, -0.2, 0)), V(-0.35, 1.55, -1.6), 0.35), smooth(k * 3)); }
             else { const k = easeIn(prog(t, 7.9, 10.63)); const kitP = H.kit.position.clone(); const a = -0.3; const from = V(0.35 + Math.sin(a) * 2.2, 1.5, -0.85 + Math.cos(a) * 2.2);
-              pos = L(from, kitP.clone().add(V(0, 0.02, 0.16)), k); at = L(danHead.clone().add(V(0, -0.25, 0)), kitP, smooth(prog(t, 8.2, 9.8))); fov = 38; }
+              pos = L(from, kitP.clone().add(V(0, 0.02, 0.16)), k); at = L(L(danHead.clone().add(V(0, -0.2, 0)), V(-0.35, 1.55, -1.6), 0.35), kitP, smooth(prog(t, 7.9, 9.8))); fov = 38; }
           } else {
             const danHead = dan.headWorld(), kitP = H.kit.position.clone();
             if (t < 99.0) { const k = easeOut(prog(t, 96.5, 98.9)); pos = L(kitP.clone().add(V(0, 0.02, 0.2)), V(0.85, 1.5, 1.5), k); at = L(kitP, danHead.clone().add(V(0, -0.15, 0)), smooth(prog(t, 96.8, 98.6))); }
@@ -160,8 +160,8 @@ export async function setup({ canvas, width, height }) {
           masked.reach('R', masked.group.localToWorld(V(-0.18, 1.05, 0.35)));
           const mh = masked.headWorld();
           if (t < 13.9) { const k = easeInOut(prog(t, 10.63, 13.9)); pos = L(V(-1.2, 9, 18), V(0.6, 2.2, 9.5), k); at = L(V(1, 1, -8), mh.clone().add(V(0, -0.4, -1)), smooth(prog(t, 11.5, 13.9))); fov = lerp(45, 40, k); }
-          else if (t < 16.0) { const k = easeInOut(prog(t, 13.9, 16.0)); pos = L(V(0.6, 2.2, 9.5), mh.clone().add(V(-1.6, -0.6, 1.8)), k); at = mh.clone().add(V(0.3, -0.2, -0.5)); }
-          else { const k = easeIn(prog(t, 16.0, 16.9)); const win = V(5.46, 1.68, -1.02); pos = L(mh.clone().add(V(-1.6, -0.6, 1.8)), win.clone().add(V(-0.45, 0, 0.05)), k); at = L(mh, win, smooth(prog(t, 16.0, 16.6))); }
+          else if (t < 16.0) { const k = easeInOut(prog(t, 13.9, 16.0)); pos = L(V(0.6, 2.2, 9.5), mh.clone().add(V(-1.6, -0.6, 1.8)), k); at = L(mh.clone().add(V(0, -0.4, -1)), mh.clone().add(V(0.3, -0.2, -0.5)), k); }
+          else { const k = easeIn(prog(t, 16.0, 16.9)); const win = V(5.46, 1.68, -1.02); pos = L(mh.clone().add(V(-1.6, -0.6, 1.8)), win.clone().add(V(-0.45, 0, 0.05)), k); at = L(mh.clone().add(V(0.3, -0.2, -0.5)), win, smooth(prog(t, 16.0, 16.6))); }
           st.userData.mood.focus(V(3, 0, 1), 8); rig.push(rigMasked); break;
         }
         // ================================================================ BEDROOM
@@ -197,9 +197,9 @@ export async function setup({ canvas, width, height }) {
           CS.lamp.userData.light.intensity = 2.6 * smooth(prog(t, 30.3, 30.45));
           CS.bag.position.y = 0.79 + 0.01 * bell(t, 30.6, 0.3);
           const bag = CS.bag.position.clone();
-          if (t < 25.5) { const k = easeInOut(prog(t, 22.79, 25.5)); pos = L(V(-0.1, 1.5, -0.4), V(-1.3, 1.75, -1.15), k); at = L(V(-0.6, 1.6, -2.45), V(-0.9, 1.6, -2.45), k); fov = 40; }
+          if (t < 25.5) { const k = easeInOut(prog(t, 22.79, 25.5)); pos = L(V(-0.1, 1.5, -0.4), V(-1.3, 1.75, -1.15), k); at = L(V(-0.6, 1.6, -2.45), V(-0.9, 1.6, -2.45), k); fov = 42; }
           else if (t < 27.7) { const k = easeInOut(prog(t, 25.5, 27.7)); pos = L(L(V(-1.3, 1.75, -1.15), V(-0.9, 1.7, 1.0), k), L(V(-0.9, 1.7, 1.0), V(1.9, 1.6, 1.5), k), k); at = L(V(-0.9, 1.6, -2.45), V(0.75, 1.7, -1.4), k); fov = 42; }
-          else if (t < 30.2) { const k = easeInOut(prog(t, 27.7, 30.2)); pos = L(V(1.9, 1.6, 1.5), V(0.4, 1.45, 2.6), k); at = L(V(0.45, 1.65, -1.2), V(-0.35, 1.0, -0.9), k); fov = lerp(42, 50, k); }
+          else if (t < 30.2) { const k = easeInOut(prog(t, 27.7, 30.2)); pos = L(V(1.9, 1.6, 1.5), V(0.4, 1.45, 2.6), k); at = L(V(0.75, 1.7, -1.4), V(-0.35, 1.0, -0.9), k); fov = lerp(42, 50, k); }
           else { const k = easeIn(prog(t, 30.2, 32.18)); pos = L(V(0.4, 1.45, 2.6), bag.clone().add(V(0, 0.2, 0.16)), k); at = L(V(-0.6, 1.0, -0.8), bag, smooth(prog(t, 30.2, 31.2))); }
           focus = cam.position.distanceTo(at); aperture = t > 30.2 ? 0.003 : 0.0015; rig.push(rigDet86); break;
         }
