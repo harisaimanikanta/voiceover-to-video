@@ -50,11 +50,14 @@ open(os.path.join(HERE, 'subs.ass'), 'w', encoding='utf-8').write(ass)
 frames, voice, out = (os.path.abspath(p) for p in (frames, voice, out))
 # Sound: sfx.wav (from sfx.py) sits ~10 dB under the voice and ducks further while the narrator speaks; the mix is normalised to -14 LUFS.
 SFX = os.path.join(HERE, 'sfx.wav'); SFX_DB = -10
-inputs = ['-i', voice] + (['-i', SFX] if os.path.exists(SFX) else [])
+MEMES = os.path.join(HERE, 'memes.wav'); MEME_DB = -12   # meme hits land in speech pauses, so they are not ducked
+inputs = ['-i', voice] + (['-i', SFX] if os.path.exists(SFX) else []) + (['-i', MEMES] if os.path.exists(SFX) and os.path.exists(MEMES) else [])
 if os.path.exists(SFX):
+    has_m = os.path.exists(MEMES)
     audio = ['-filter_complex', f"[1:a]aformat=sample_rates=48000:channel_layouts=stereo,asplit=2[vo][sc];[2:a]volume={SFX_DB}dB[fx];"
-             "[fx][sc]sidechaincompress=threshold=0.03:ratio=4:attack=25:release=450[fxd];"
-             "[vo][fxd]amix=inputs=2:normalize=0:duration=first,loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[aout]", '-map', '0:v', '-map', '[aout]']
+             "[fx][sc]sidechaincompress=threshold=0.03:ratio=4:attack=25:release=450[fxd];" + (f"[3:a]volume={MEME_DB}dB[mm];" if has_m else '') +
+             f"[vo][fxd]{'[mm]' if has_m else ''}amix=inputs={3 if has_m else 2}:normalize=0:duration=first,loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[aout]",
+             '-map', '0:v', '-map', '[aout]']
 else:
     audio = ['-af', 'loudnorm=I=-14:TP=-1.5:LRA=11', '-map', '0:v', '-map', '1:a']
 subprocess.run(['ffmpeg', '-v', 'error', '-y', '-framerate', '30', '-start_number', '1', '-i', os.path.join(frames, '%05d.png')] + inputs + audio + [

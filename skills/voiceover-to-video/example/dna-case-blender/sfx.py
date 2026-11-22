@@ -156,7 +156,7 @@ for t0, t1 in ((0, 10.63), (96.5, 103.81)):
     bed(city(t1 - t0), t0, t1, -38, pan=0.3, fi=1.5 if t0 == 0 else 0.2, fo=0.2 if t0 == 0 else 2.5)
 for i in range(4): add(click(1400, 0.05, 0.8), 4.45 + i * 0.25, -30, -0.4)          # cousin photos pinned to the board
 add(cloth(0.5), 7.95, -32); add(thud(180, 0.15, None, 0.4), 7.97, -34)                # kit lifted off the desk
-add(riser(1.4), 98.95, -30); add(boom(), 100.33, -22)                               # "IS YOUR DNA OUT THERE?" hit
+add(riser(1.0), 99.05, -30)                                                          # rises into the vine boom on "His cousins did."
 # --- 2. 1970s street (10.63-13.95)
 bed(crickets(3.4), 10.63, 13.95, -33, fi=0.6, fo=0.15); bed(wind(3.4), 10.63, 13.95, -36, pan=-0.2, fo=0.15)
 bed(hum(3.4, 60, 0.6), 10.63, 13.95, -46, pan=0.5, fo=0.15)                          # streetlight buzz
@@ -209,7 +209,6 @@ add(click(1800, 0.03, 0.5), 52.3, -32, -0.3); add(click(1800, 0.03, 0.5), 56.25,
 add(chime(1318.5, 1.2), 56.35, -30); add(chime(1760, 1.2), 56.5, -32)                   # upload complete
 steps(56.85, 58.3, 0.36, 'office', -32, 0.3)                                            # det2 walks to the wall screen
 for t in (57.3, 60.0, 63.1, 66.5): add(norm(sine(np.linspace(880, 1320, int(0.09 * SR)), 0.09) * np.exp(-T(0.09) / 0.03)), t, -32)   # chart updates
-add(chime(659.3, 2.0), 71.35, -26); add(chime(987.8, 2.0), 71.5, -30)                   # THIS MAN
 # --- 8. suburb, day (73.31-88.37)
 bed(birds(15.1), 73.31, 88.37, -32, pan=-0.2, fi=0.3); bed(wind(15.1), 73.31, 88.37, -42, fi=0.3); bed(city(15.1), 73.31, 88.37, -46, pan=0.4)
 add(whoosh(0.7, 300, 3000), 73.1, -36)
@@ -240,6 +239,36 @@ add(metal_ping([2400, 3900, 5600], 0.25, 0.05), 94.5, -32, 0.3)                 
 add(cloth(0.4), 94.75, -30); add(cloth(0.35), 95.7, -30)                                      # slipped into the jacket
 for k in range(5): add(click(5200, 0.02, 0.5), 95.45 + k * 0.06, -34, 0.3)                    # spray can rattle
 add(whoosh(0.5, 300, 3000), 96.3, -34)
+
+# ================================================================ meme hits (own stem -> memes.wav, mixed near voice level by post.py)
+# Comic/curious beats only, each in the pause right after the words it reacts to. None in 10.6-32 s (the killings stay serious).
+# Files: sfx_memes/*.mp3 from myinstants.com (generic meme sounds; no clips of songs, films or games). Not committed to the repo
+# (third-party uploads); fetch them into sfx_memes/ with these names: https://www.myinstants.com/media/sounds/<file>
+MEME_SOURCES = {'vine_boom': 'vine-boom-meme_cCCpxZG.mp3', 'bruh': 'bruh-sound-effect_WstdzdM.mp3', 'huh_cat': 'huh-cat-meme.mp3',
+                'shocked': 'shocked-sound-effect.mp3', 'awkward': 'awkward-moment.mp3', 'camera': 'zvuk-fotoapparata.mp3', 'omg': 'oh-my-god-meme.mp3'}
+MEMES = [('huh_cat', 10.42, -3, 9),     # "...caught by someone else's DNA test" -> HUH?   (name, time, gain dB, max seconds)
+         ('bruh', 43.3, -4, 9),         # NO MATCH
+         ('shocked', 52.02, -4, 0.5),   # "...detectives try something no one expects" (trimmed: next line starts at 52.21)
+         ('vine_boom', 59.76, -2, 9),   # "He isn't on it, but his cousins are."
+         ('vine_boom', 70.92, -3, 9),   # "...looking for one man."
+         ('camera', 76.58, 0, 9),       # "Joseph DeAngelo" -> mugshot snap
+         ('awkward', 82.45, 0, 1.2),    # "Now they need proof, so they watch him." (binoculars)
+         ('omg', 89.42, -4, 1.0),       # "It's a match!"
+         ('bruh', 96.4, -2, 9),         # "...fired for stealing a hammer and dog spray."
+         ('vine_boom', 100.1, 0, 9)]    # "His cousins did."
+ML = np.zeros(N); MR = np.zeros(N); MEME_DIR = os.path.join(HERE, 'sfx_memes')
+def load_mp3(p):
+    import subprocess
+    raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', p, '-ac', '1', '-ar', str(SR), '-f', 's16le', '-'], capture_output=True).stdout
+    return np.frombuffer(raw, '<i2').astype(float) / 32768
+if os.path.isdir(MEME_DIR):
+    for name, t0, g, maxd in MEMES:
+        p = os.path.join(MEME_DIR, name + '.mp3')
+        if not os.path.exists(p): continue
+        x = fade(norm(load_mp3(p))[:int(maxd * SR)], 0.003, 0.08) * db(g); i = int(t0 * SR); x = x[:N - i]; ML[i:i + len(x)] += x * 0.707; MR[i:i + len(x)] += x * 0.707
+    mm = np.stack([ML, MR])[:, :int(DUR * SR)]; mm = np.clip(mm * db(-1), -1, 1)
+    with wave.open(os.path.join(os.path.dirname(OUT), 'memes.wav'), 'wb') as w: w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes((mm.T * 32767).astype('<i2').tobytes())
+    print('memes:', len(MEMES), 'hits')
 
 # ---------------------------------------------------------------- master: gentle limiter, write 16-bit stereo
 mix = np.stack([L, R])[:, :int(DUR * SR)]
