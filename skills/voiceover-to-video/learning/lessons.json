@@ -694,5 +694,53 @@
     "status": "open",
     "hits": 1,
     "history": []
+  },
+  {
+    "id": "L043",
+    "date": "2026-11-22",
+    "last_seen": "2026-11-22",
+    "area": "pipeline",
+    "title": "Blender background mode only animates the active scene",
+    "symptom": "Stills of per-set scenes ignored camera cuts and animation (frozen at last key)",
+    "cause": "In background mode only the context scene's depsgraph evaluates animation",
+    "fix": "Build one set per Blender run directly in the active scene (--set NAME)",
+    "rule": "Blender: one set per process; never render secondary scenes",
+    "source": "self",
+    "check": null,
+    "status": "open",
+    "hits": 1,
+    "history": []
+  },
+  {
+    "id": "L044",
+    "date": "2026-11-22",
+    "last_seen": "2026-11-22",
+    "area": "character",
+    "title": "Hands drift when characters move",
+    "symptom": "IK hands reached the wrong place once a character walked or stepped",
+    "cause": "IK targets stored relative to the character's frame-1 transform",
+    "fix": "World-space IK targets (unparented); poles parented to the rig",
+    "rule": "IK targets are world-space; verify every contact in a close still",
+    "source": "self",
+    "check": null,
+    "status": "open",
+    "hits": 1,
+    "history": []
+  },
+  {
+    "id": "L045",
+    "date": "2026-11-22",
+    "last_seen": "2026-11-22",
+    "area": "character",
+    "title": "Pop-in animation overrode object size",
+    "symptom": "Photos and the stamp ballooned to 1 m when they popped in",
+    "cause": "Scale keys set to (1,1,1) instead of a multiple of the object's own scale",
+    "fix": "Key scale as base_scale * k",
+    "rule": "Scale animations multiply the object's own scale",
+    "source": "self",
+    "check": null,
+    "status": "open",
+    "hits": 1,
+    "history": []
   }
 ]

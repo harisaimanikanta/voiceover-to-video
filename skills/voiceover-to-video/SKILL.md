@@ -18,6 +18,16 @@ lighting, soft contact shadows plus AO, glossy hero reflector, long lens plus bo
 Build with `kit/look.js` (mood, faceRig, soft materials), `kit/toon.js` (cast), `kit/props.js` (cozyRoom/lab/street + props). Worked example (87.7 s, 22 environments): `example/` (scene.js + sets*.js + TREATMENT-v2.md + voiceover.mp3).
 Kit API and gotchas: `references/kit-api.md` (+ `kit/fx.js` particles/beams/camera helpers, `kit/toon.js` cartoon cast with `reach()` IK).
 
+## Renderer choice (v4)
+- **Blender (preferred for quality):** `blender/bkit.py` builds rigged cute characters (IK hands with world-space targets, face rig with
+  emotions, blinks and lip-sync, mitten hands), the two approved looks (`look_night`: warm lamp key, cool window rim, city bokeh;
+  `look_day`: one strong side sunbeam with cast shadows, saturated palette), props and **shots with clean cuts** (`shot()` binds cameras to
+  timeline markers). Reference production: `example/dna-case-blender/` (dna.py, textures.py, post.py for titles and captions, render_all.py).
+  Build **one set per Blender run** (`--set NAME`): only the active scene animates correctly in background mode. Render stills here with
+  Cycles CPU for the storyboard (about 4 s each at 360×640). Render the final video on the user's GPU (EEVEE, about 1–3 s per frame) with
+  `render_all.py`, see README-LAPTOP.md, or directly when a computer folder is connected.
+- **Three.js (fallback, no GPU needed):** the kit below. It can't do ray-traced reflections; use it when Blender isn't available.
+
 ## Setup (ask first, once)
 `bash ${CLAUDE_SKILL_DIR}/scripts/setup.sh` (npm deps, pocketsphinx, ffmpeg check, Playwright Chromium).
 

@@ -66,6 +66,7 @@ def main():
     ap.add_argument('--treatment'); ap.add_argument('--panels'); ap.add_argument('--title', default='')
     ap.add_argument('--cols', type=int, default=4); ap.add_argument('--rows', type=int, default=3)
     ap.add_argument('--thumb', type=int, default=540, help='panel render width (9:16)')
+    ap.add_argument('--frames', help='use pre-rendered stills (e.g. from Blender): DIR/{t:07.2f}.png per panel instead of rendering scene.js')
     a = ap.parse_args()
     panels = json.load(open(a.panels)) if a.panels else parse_treatment(a.treatment or os.path.join(a.workdir, 'TREATMENT.md'))
     if not panels: sys.exit('no panels found (treatment rows need a "a–b" time range in the first column)')
@@ -73,12 +74,14 @@ def main():
     json.dump(panels, open(os.path.join(out, 'panels.json'), 'w'), indent=1, ensure_ascii=False)
 
     # render every panel frame from the real scene in one browser session
-    scene = os.path.abspath(a.scene); base = os.path.splitext(os.path.basename(scene))[0]
     W, H = a.thumb, a.thumb * 16 // 9
-    cmd = ['node', os.path.join(HERE, 'render.mjs'), scene, '--width', str(W), '--height', str(H)]
-    for p in panels: cmd += ['--still', js(p['t'])]
-    subprocess.run(cmd, cwd=out, check=True, stdout=subprocess.DEVNULL)
-    frames = [os.path.join(out, 'out', f"{base}-{js(p['t'])}s.jpg") for p in panels]
+    if a.frames: frames = [os.path.join(a.frames, f"{float(p['t']):07.2f}.png") for p in panels]
+    else:
+        scene = os.path.abspath(a.scene); base = os.path.splitext(os.path.basename(scene))[0]
+        cmd = ['node', os.path.join(HERE, 'render.mjs'), scene, '--width', str(W), '--height', str(H)]
+        for p in panels: cmd += ['--still', js(p['t'])]
+        subprocess.run(cmd, cwd=out, check=True, stdout=subprocess.DEVNULL)
+        frames = [os.path.join(out, 'out', f"{base}-{js(p['t'])}s.jpg") for p in panels]
 
     # compose pages
     per = a.cols * a.rows; pad, gap = 70, 44; tw = W; th = H; text_h = 380
@@ -92,7 +95,7 @@ def main():
         rows = -(-len(page) // a.cols); PH = head + rows * (th + text_h + gap) + pad
         img = Image.new('RGB', (PW, PH), PAPER); d = ImageDraw.Draw(img)
         d.text((pad, 60), (a.title or 'Storyboard').upper(), font=fT, fill=INK)
-        d.text((pad, 140), f'{len(panels)} panels · {tc(dur)} · 9:16 one continuous take · page {pi + 1}/{len(pages)}', font=fS, fill=MUTED)
+        d.text((pad, 140), f'{len(panels)} panels · {tc(dur)} · 9:16 · page {pi + 1}/{len(pages)}', font=fS, fill=MUTED)
         bx = PW - pad - 330; d.rounded_rectangle([bx, 62, PW - pad, 128], 14, outline=INK, width=3)
         d.text((bx + 22, 78), 'APPROVED', font=font('bold', 30), fill=INK); d.rounded_rectangle([PW - pad - 70, 77, PW - pad - 34, 113], 6, outline=INK, width=3)
         d.line([pad, 200, PW - pad, 200], fill=ACCENT, width=4)
