@@ -630,5 +630,53 @@
     "status": "open",
     "hits": 1,
     "history": []
+  },
+  {
+    "id": "L039",
+    "date": "2026-11-22",
+    "last_seen": "2026-11-22",
+    "area": "character",
+    "title": "Copied the reference's character design",
+    "symptom": "When asked to match the reference's lighting/environment, the test recreated the reference's man (grey curly hair, round glasses, toy proportions)",
+    "cause": "Treated the reference as a full style to copy instead of a lighting/environment reference",
+    "fix": "Take only what the user names (lighting, shadows, reflections, environment); keep the user's own original characters",
+    "rule": "A reference video is for the aspects the user names only; never recreate its characters or designs",
+    "source": "user",
+    "check": null,
+    "status": "open",
+    "hits": 1,
+    "history": []
+  },
+  {
+    "id": "L040",
+    "date": "2026-11-22",
+    "last_seen": "2026-11-22",
+    "area": "character",
+    "title": "Hands with fingers look bad",
+    "symptom": "Our 3-finger hands look odd; the reference's simple faceted mitten hands look good",
+    "cause": "Finger detail at cartoon scale reads as creepy",
+    "fix": "Cute rounded mitten hands (no fingers or nails) by default",
+    "rule": "Default hands: rounded mittens with a thumb bump, no fingers or nails",
+    "source": "user",
+    "check": null,
+    "status": "open",
+    "hits": 1,
+    "history": []
+  },
+  {
+    "id": "L041",
+    "date": "2026-11-22",
+    "last_seen": "2026-11-22",
+    "area": "lighting",
+    "title": "Too dark and glassy toy look",
+    "symptom": "Night test was so dark the character could not be seen; glossy materials looked like a glass toy, not a character who acts",
+    "cause": "Copied the reference's night mood instead of its lighting quality; coat/gloss pushed too high",
+    "fix": "Bright, readable daylight with soft shadows; satin materials (roughness 0.4-0.6, light coat); character design that can act (real eyes, a pose)",
+    "rule": "The subject is always clearly lit and readable; reflections are subtle satin, never glass; characters look like actors, not figurines",
+    "source": "user",
+    "check": null,
+    "status": "open",
+    "hits": 1,
+    "history": []
   }
 ]
