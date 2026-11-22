@@ -172,6 +172,7 @@ class Character:
         s.parts = []
         def attach(objs, bname):
             for o in (objs if isinstance(objs, list) else [objs]):
+                vl.update()   # fresh empties (eye/brow/mouth pivots) have no matrix_world until an update; without this they pivot from the world origin
                 mw = o.matrix_world.copy(); o.parent = s.arm; o.parent_type = 'BONE'; o.parent_bone = bname; vl.update(); o.matrix_world = mw; s.parts.append(o)
         C, Mm = coll, s.M
         # ---- body
@@ -207,11 +208,14 @@ class Character:
             mw = bo.matrix_world.copy(); bo.parent = b; vl.update(); bo.matrix_world = mw; s.brows.append((b, x, b.location.copy(), b.rotation_euler.copy()))
         s.mouth = bpy.data.objects.new(name + '_mouth', None); s.mouth.location = (0, -0.235, 1.52); C.objects.link(s.mouth); attach(s.mouth, 'head')
         def mpart(o):
+            if isinstance(o, list):   # capsule: the end-cap spheres ride on the cylinder (they floated, unparented, at the world origin)
+                for e in o[1:]: vl.update(); emw = e.matrix_world.copy(); e.parent = o[0]; vl.update(); e.matrix_world = emw
+                o = o[0]
             mw = o.matrix_world.copy(); o.parent = s.mouth; vl.update(); o.matrix_world = mw; return o
         s.mouths = {
             'smile': mpart(torus(C, (0, -0.235, 1.535), 0.055, 0.012, Mm['mouth'], rot=(math.radians(80), 0, 0), name=name + '_smile', arc=(-math.pi + 0.5, -0.5))),
             'frown': mpart(torus(C, (0, -0.235, 1.49), 0.045, 0.011, Mm['mouth'], rot=(math.radians(80), 0, 0), name=name + '_frown', arc=(0.6, math.pi - 0.6))),
-            'flat': mpart(capsule(C, (-0.035, -0.238, 1.52), (0.035, -0.238, 1.52), 0.009, Mm['mouth'], name + '_flat')[0]),
+            'flat': mpart(capsule(C, (-0.035, -0.238, 1.52), (0.035, -0.238, 1.52), 0.009, Mm['mouth'], name + '_flat')),
             'open': mpart(sphere(C, (0, -0.232, 1.515), 0.045, Mm['mouth'], (1.0, 0.35, 0.75), name=name + '_open')),
             'o': mpart(sphere(C, (0, -0.236, 1.515), 0.026, Mm['mouth'], (1, 0.4, 1.2), name=name + '_o')),
         }
@@ -224,7 +228,7 @@ class Character:
             attach(sphere(C, (dx, 0.03 + (0.06 if hair_style == 'bald' else 0) - (0.05 if k < 3 and hair_style != 'bald' else 0), 1.62 + dz), r, Mm['hair'], (1, 1, 0.75), seg=32, name=name + '_hair'), 'head')
         if glasses:
             for x in (-1, 1): attach(torus(C, (x * 0.095, -0.268, 1.655), 0.075, 0.01, Mm['black'], rot=(math.pi / 2, 0, 0), name=name + '_glass'), 'head')
-            attach(capsule(C, (-0.025, -0.27, 1.665), (0.025, -0.27, 1.665), 0.008, Mm['black'], name + '_bridge')[0], 'head')
+            attach(capsule(C, (-0.025, -0.27, 1.665), (0.025, -0.27, 1.665), 0.008, Mm['black'], name + '_bridge'), 'head')   # whole capsule: the end caps used to stay behind at the world origin
         if moustache: attach(sphere(C, (0, -0.25, 1.555), 0.05, Mm['hair'], (1.3, 0.35, 0.35), name=name + '_moust'), 'head')
         if hood:
             hm = mat(name + 'hood', hood, 0.55)
@@ -294,6 +298,8 @@ class Character:
             ph = k * d / stride * math.pi; sw = 0.45 * math.sin(ph)
             s.pose(f, {'thigh.L': (sw, 0, 0), 'thigh.R': (-sw, 0, 0), 'shin.L': (-0.5 * max(0, -math.sin(ph)), 0, 0), 'shin.R': (-0.5 * max(0, math.sin(ph)), 0, 0),
                        'upper_arm.L': (-0.3 * math.sin(ph), 0, 0), 'upper_arm.R': (0.3 * math.sin(ph), 0, 0), 'hips': (0, 0, 0)})
+        # settle into a standing pose after the last step (the last stride used to be held forever)
+        s.pose(F(t1) + 6, {'thigh.L': (0, 0, 0), 'thigh.R': (0, 0, 0), 'shin.L': (0, 0, 0), 'shin.R': (0, 0, 0), 'upper_arm.L': (0, 0, math.radians(-8)), 'upper_arm.R': (0, 0, math.radians(8))})
     def sit(s, frame):
         s.pose(frame, {'thigh.L': (math.radians(-90), 0, 0), 'thigh.R': (math.radians(-90), 0, 0), 'shin.L': (math.radians(90), 0, 0), 'shin.R': (math.radians(90), 0, 0)})
     def rest(s, frame):

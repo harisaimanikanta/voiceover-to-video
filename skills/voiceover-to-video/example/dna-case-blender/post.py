@@ -44,8 +44,10 @@ Style: Sub,Inter SemiBold,40,&H00FFFFFF,&H00FFFFFF,&H00000000,&H64000000,1,0,0,0
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """ + '\n'.join(ev) + '\n'
-open(os.path.join(HERE, 'subs.ass'), 'w').write(ass)
+open(os.path.join(HERE, 'subs.ass'), 'w', encoding='utf-8').write(ass)
+# Windows: a drive letter ("D:") inside the filter string breaks ffmpeg's option parser, so run from HERE and pass a bare file name.
+frames, voice, out = (os.path.abspath(p) for p in (frames, voice, out))
 subprocess.run(['ffmpeg', '-v', 'error', '-y', '-framerate', '30', '-start_number', '1', '-i', os.path.join(frames, '%05d.png'), '-i', voice,
-                '-vf', f"scale=1080:1920:flags=lanczos,ass={os.path.join(HERE, 'subs.ass')},format=yuv420p", '-c:v', 'libx264', '-crf', '18', '-preset', 'medium',
-                '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', out], check=True)
+                '-vf', "scale=1080:1920:flags=lanczos,ass=subs.ass,format=yuv420p", '-c:v', 'libx264', '-crf', '18', '-preset', 'medium',
+                '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', out], check=True, cwd=HERE)
 print('final:', out)
