@@ -614,5 +614,21 @@
     "hits": 1,
     "history": [],
     "where": "scripts/storyboard.py js()"
+  },
+  {
+    "id": "L038",
+    "date": "2026-11-22",
+    "last_seen": "2026-11-22",
+    "area": "lighting",
+    "title": "Reference look: realistic night-office lighting",
+    "symptom": "User showed a reference reel that looks realistic through lighting, reflections and soft shadows; our renders look flat and high-key",
+    "cause": "High-key mood lighting, AO off, hard PCF shadows, wide lenses, weak DoF, oversaturated grade",
+    "fix": "Low-key practical lighting (lamp key, screen fill, window rim, warm bounce), VSM soft shadows, GTAO, long lenses with strong DoF, glossy hero reflector, sat 1.0 (see references/reference-look.md)",
+    "rule": "Light every set from motivated practicals in a low-key scene; soft contact shadows and AO always on; long lens plus DoF on character shots",
+    "source": "user",
+    "check": null,
+    "status": "open",
+    "hits": 1,
+    "history": []
   }
 ]

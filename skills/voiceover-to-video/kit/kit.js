@@ -137,14 +137,14 @@ export function makePost(renderer, width, height, { ao = true, bloom = 0.25, dof
     composer,
     grade: gv.uniforms,
     /** fx: {focus, aperture, bloom, zoom (0..1 radial blur), fill (0..1), fillColor, sat, con, warm, split} */
-    render(scene, camera, t = 0, { focus = null, aperture = 0, bloom: bl = null, zoom = 0, fill = 0, fillColor = null, sat = null, con = null, warm = null, exposure = null } = {}) {
+    render(scene, camera, t = 0, { focus = null, aperture = 0, maxblur = 0.008, bloom: bl = null, zoom = 0, fill = 0, fillColor = null, sat = null, con = null, warm = null, exposure = null } = {}) {
       const u = gv.uniforms; u.uZoom.value = zoom; u.uFill.value = fill; if (fillColor) u.uFillColor.value.set(fillColor);
       if (sat != null) u.uSat.value = sat; if (con != null) u.uCon.value = con; if (warm != null) u.uWarm.value = warm;
       if (bloomPass && bl != null) bloomPass.strength = bl; if (exposure != null) renderer.toneMappingExposure = exposure;
       rp.scene = scene; rp.camera = camera;
       if (gtao) { gtao.scene = scene; gtao.camera = camera; }
       if (bokeh) { bokeh.scene = scene; bokeh.camera = camera; bokeh.enabled = aperture > 0 && focus != null;
-        if (bokeh.enabled) { const u = bokeh.uniforms; u.focus.value = focus; u.aperture.value = aperture; u.nearClip.value = camera.near; u.farClip.value = camera.far; u.aspect.value = camera.aspect; } }
+        if (bokeh.enabled) { const u = bokeh.uniforms; u.focus.value = focus; u.aperture.value = aperture; u.maxblur.value = maxblur; u.nearClip.value = camera.near; u.farClip.value = camera.far; u.aspect.value = camera.aspect; } }
       gv.uniforms.uTime.value = t;
       composer.render();
     },

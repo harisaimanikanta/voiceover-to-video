@@ -13,6 +13,8 @@ Skill folder: `${CLAUDE_SKILL_DIR}`.
 lights and haze. Densely dressed rounded sets. Reference: `example/cartoon/` (scene.js, TREATMENT.md, storyboard sheet, demo.mp4).
 Full production reference: `example/dna-case/` (104 s true-crime explainer: 11 sets incl. study, 70s street, bedroom, offices, DNA world, records
 room, family tree, suburb, lab, arrest; host lip-sync, portal map, emotion tracks; sets.js has cars, police props, filing cabinets, portraits…).
+**Realism reference:** `references/reference-look.md`, a frame-by-frame breakdown of the user's reference reel (low-key practical
+lighting, soft contact shadows plus AO, glossy hero reflector, long lens plus bokeh, cut-based clarity). Read it before lighting a set.
 Build with `kit/look.js` (mood, faceRig, soft materials), `kit/toon.js` (cast), `kit/props.js` (cozyRoom/lab/street + props). Worked example (87.7 s, 22 environments): `example/` (scene.js + sets*.js + TREATMENT-v2.md + voiceover.mp3).
 Kit API and gotchas: `references/kit-api.md` (+ `kit/fx.js` particles/beams/camera helpers, `kit/toon.js` cartoon cast with `reach()` IK).
 
