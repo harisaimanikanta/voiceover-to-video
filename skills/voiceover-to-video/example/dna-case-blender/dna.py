@@ -75,13 +75,19 @@ def house(C, loc, wall='#c8b8e8', roof='#5a4a7a', rotz=0.0, lit=False):
 def tree(C, loc, h=3.0):
     x, y, z = loc; cyl(C, (x, y, h * 0.3), 0.12, h * 0.6, mat('trunk', '#7a4a2c', 0.6))
     for k, (dx, dy, dz, r) in enumerate([(0, 0, 0.75, 0.32), (0.25, 0.1, 0.65, 0.24), (-0.25, -0.1, 0.68, 0.25), (0.05, 0.2, 0.9, 0.2)]): sphere(C, (x + dx * h, y + dy * h, dz * h), r * h, mat('leafT', '#4f9a48', 0.5, 0.1), seg=24)
-def car(C, loc, color='#d98b3a', rotz=0.0, police=False):
-    x, y, z = loc; body = mat('car' + color, color, 0.25, 0.8); dark = mat('tyre', '#1d2230', 0.7); glass = mat('cglass', '#9fc8e8', 0.08, 1.0)
+def car(C, loc, color='#d98b3a', rotz=0.0, police=False, rig=False, see_through=False):
+    """rig=True: all parts parented to an empty at (x, y, 0), returned so the car can be driven. see_through: windows show who is inside."""
+    x, y, z = loc; body = mat('car' + color, color, 0.25, 0.8); dark = mat('tyre', '#1d2230', 0.7)
+    glass = mat('cglass_st', '#bfe0f4', 0.05, 0.6, alpha=0.3) if see_through else mat('cglass', '#9fc8e8', 0.08, 1.0)
     c = math.cos(rotz); s_ = math.sin(rotz)
     def P(dx, dy, dz): return (x + dx * c - dy * s_, y + dx * s_ + dy * c, dz)
-    box(C, P(0, 0, 0.62), (1.8, 4.2, 0.55), body, 0.15, rot=(0, 0, rotz)); box(C, P(0, 0.2, 1.1), (1.6, 2.1, 0.5), glass, 0.15, rot=(0, 0, rotz))
+    parts = [box(C, P(0, 0, 0.62), (1.8, 4.2, 0.55), body, 0.15, rot=(0, 0, rotz)), box(C, P(0, 0.2, 1.1), (1.6, 2.1, 0.5), glass, 0.15, rot=(0, 0, rotz))]
     for dx in (-0.86, 0.86):
-        for dy in (-1.35, 1.35): cyl(C, P(dx, dy, 0.34), 0.34, 0.26, dark, rot=(0, math.pi / 2, rotz))
+        for dy in (-1.35, 1.35): parts.append(cyl(C, P(dx, dy, 0.34), 0.34, 0.26, dark, rot=(0, math.pi / 2, rotz)))
+    if rig:
+        root = bpy.data.objects.new('carrig', None); root.location = (x, y, 0); root.rotation_euler = (0, 0, rotz); C.objects.link(root); bpy.context.view_layer.update()
+        for o in parts: mw = o.matrix_world.copy(); o.parent = root; o.matrix_parent_inverse = root.matrix_world.inverted(); o.matrix_world = mw
+        return root
     if police:
         r = box(C, P(-0.3, 0.2, 1.42), (0.5, 0.22, 0.12), mat('pred', '#ff2a2a', 0.3, emit='#ff2020', emit_s=8), 0.04, rot=(0, 0, rotz))
         b = box(C, P(0.3, 0.2, 1.42), (0.5, 0.22, 0.12), mat('pblue', '#2a6aff', 0.3, emit='#2050ff', emit_s=8), 0.04, rot=(0, 0, rotz)); return r, b
@@ -157,7 +163,52 @@ if SET == 'street':
     point(C, (2.9, 0.5, 1.2), '#ff3a2a', 25, 0.3)   # red rim behind the villain (menace)
     # closer crane-down so the villain reads (he was a speck 16 m away); ends on the road, clear of cars and lamp posts
     shot(sc, C, 's1', 10.63, [(10.63, (-0.5, -6.0, 4.5), (2.2, 6.0, 1.0)), (13.9, (0.8, -1.5, 1.8), (2.7, 5.5, 1.2))], lens=35, fstop=None)
-    shot(sc, C, 's2', 13.95, [(13.95, (2.4, -3.8, 0.75), (2.9, 3.0, 1.45)), (16.9, (2.5, -4.6, 0.7), (2.9, -1.0, 1.5))], lens=40, fstop=2.8, focus=None)
+    # ---- s2 "A masked man is breaking into homes": inside a dark house (built at x=-40). The front door is kicked off its hinges and slams flat
+    # toward the camera; a cold street light floods in behind him: a hooded silhouette with glowing red eyes, his shadow across the floor.
+    OX, DY = -40.0, 3.0   # house origin x; y of the front-door wall
+    def H(x, y, z): return (OX + x, y, z)
+    wallm = mat('hwall', '#3a3f55', 0.8); floorm = mat('hfloor', '#4a3426', 0.45, 0.2)
+    plane(C, H(0, 0, 0), (7, 8), floorm); box(C, H(0, 0.0, 2.65), (7, 8, 0.1), wallm, 0)   # floor + ceiling (keeps the moon out)
+    for x in (-3.5, 3.5): box(C, H(x, 0, 1.3), (0.1, 8, 2.6), wallm, 0)
+    box(C, H(0, -4.0, 1.3), (7, 0.1, 2.6), wallm, 0)
+    box(C, H(-1.99, DY, 1.3), (3.02, 0.1, 2.6), wallm, 0); box(C, H(1.99, DY, 1.3), (3.02, 0.1, 2.6), wallm, 0); box(C, H(0, DY, 2.37), (0.96, 0.1, 0.56), wallm, 0)  # wall around the doorway
+    box(C, H(-2.2, 1.2, 0.4), (0.9, 0.5, 0.8), mat('hdresser', '#5a3e2c', 0.5), 0.03); cyl(C, H(-2.2, 1.2, 0.95), 0.07, 0.3, mat('hlamp', '#c8b890', 0.5))   # dresser + unlit lamp
+    board(C, H(1.6, DY - 0.06, 1.55), (0.6, 0.45), os.path.join(TEX, 'city.png'), '#2a1e16').rotation_euler = (math.pi / 2, 0, 0)   # picture on the wall
+    cyl(C, H(2.6, 2.4, 0.9), 0.025, 1.8, mat('hrack', '#3a2a1e', 0.5)); sphere(C, H(2.6, 2.4, 1.6), 0.16, mat('hcoat', '#2a3a5a', 0.7), (1, 0.7, 1.8))   # coat rack
+    plane(C, H(0, DY + 5, 0), (12, 10), mat('porch', '#2a2c34', 0.7)); plane(C, H(0, DY + 9, 2.5), (14, 6), image_mat('city2', os.path.join(TEX, 'city.png'), emit_s=0.9), rot=(math.pi / 2, 0, 0))
+    spot(C, H(0.5, DY + 5.0, 2.7), H(-0.1, -1.5, 0.0), '#a8b8ff', 2500, 34, 0.25, 0.04)   # street light behind him: the only light in the scene
+    doorm = mat('hdoor', '#6a4a32', 0.5); hdoor = box(C, H(0, DY, 1.07), (0.95, 0.06, 2.08), doorm, 0.01, name='hdoor')
+    T_KICK = 14.32
+    def door_at(t, th, slide=0.0, twist=0.0):   # door falls toward -y about its bottom edge; th in degrees
+        a = math.radians(th); key(hdoor, 'location', F(t) if isinstance(t, float) else t, V(H(slide * 0.4, DY - 0.03 - slide - 1.04 * math.sin(a), 0.03 + 1.04 * math.cos(a) + 0.03 * math.sin(a))))
+        key(hdoor, 'rotation_euler', F(t) if isinstance(t, float) else t, V((a, 0, twist)))
+    door_at(10.6, 0); door_at(T_KICK, 0)
+    for k, (dt, th) in enumerate([(0.04, 10), (0.1, 28), (0.16, 50), (0.22, 72), (0.27, 90), (0.32, 84), (0.37, 90)]): door_at(T_KICK + dt, th, slide=min(0.15, 0.04 * (k + 1)), twist=0.12 * min(1, k / 3))
+    chipm = mat('chip', '#8a6040', 0.6)
+    for i in range(7):   # splinters from the lock side
+        ch = box(C, H(0.42, DY, 1.0), (0.04, 0.02, 0.12), chipm, 0.003, name='chip'); v0 = V((0.6 * math.cos(i * 0.9), -2.2 - 0.3 * (i % 3), 1.2 + 0.25 * (i % 4)))
+        for j in range(9):
+            tt = j * 0.06; p = V(H(0.42, DY - 0.05, 1.0)) + v0 * tt + V((0, 0, -4.9 * tt * tt))
+            if p.z < 0.02: p.z = 0.02
+            key(ch, 'location', F(T_KICK + tt), p); key(ch, 'rotation_euler', F(T_KICK + tt), V((tt * 20 + i, tt * 14, i)))
+        key_vis(ch, 1, False); key_vis(ch, F(T_KICK), True)
+    vd = Character(C, 'vild', H(0, DY + 0.75, 0), 0, skin='#1a1d26', shirt='#14161c', pants='#1a1c22', shoes='#0c0c0c', hair_style='none', hood='#121419', eyes='#ff1010')
+    redeye = mat('redeye', '#ff1010', 0.3, emit='#ff2010', emit_s=22); blackeye = mat('blackeye', '#050505', 0.6)
+    for o in C.objects:
+        if o.name.startswith(('vild_iris', 'vild_pupil')): o.data.materials[0] = redeye
+        elif o.name.startswith('vild_sclera'): o.data.materials[0] = blackeye
+    eyeglow = point(C, H(0, DY + 0.5, 1.66), '#ff2010', 3, 0.05); eyeglow.parent = vd.arm; eyeglow.matrix_parent_inverse = vd.arm.matrix_world.inverted()
+    vd.rest(F(10.6)); vd.emote(F(10.7), 'menacing'); vd.blinks(15.0, 16.9, 4.0)
+    vd.pose(F(T_KICK - 0.2), {'thigh.R': (math.radians(-70), 0, 0), 'shin.R': (math.radians(80), 0, 0)})   # chamber
+    vd.pose(F(T_KICK), {'thigh.R': (math.radians(-80), 0, 0), 'shin.R': (math.radians(5), 0, 0)})        # kick
+    vd.pose(F(T_KICK + 0.25), {'thigh.R': (math.radians(-60), 0, 0), 'shin.R': (math.radians(70), 0, 0)})
+    vd.pose(F(T_KICK + 0.5), {'thigh.R': (0, 0, 0), 'shin.R': (0, 0, 0)})
+    vd.place(F(10.6), H(0, DY + 0.75, 0), 0.0); vd.place(F(15.1), H(0, DY + 0.75, 0), 0.0)
+    vd.walk(15.2, 16.0, (OX, DY + 0.75), (OX, DY - 0.45), 0.55)   # steps over the threshold onto the fallen door
+    vd.pose(F(16.2), {'head': (math.radians(8), 0, math.radians(-6))})
+    shot(sc, C, 's2', 13.95, [(13.95, H(0.3, -0.1, 0.8), H(0, DY, 1.25)), (T_KICK, H(0.3, 0.0, 0.8), H(0, DY, 1.25)),
+                               (T_KICK + 0.05, H(0.34, -0.03, 0.83), H(0.02, DY, 1.27)), (T_KICK + 0.12, H(0.27, 0.02, 0.78), H(-0.02, DY, 1.24)),   # impact shake
+                               (T_KICK + 0.2, H(0.3, 0.02, 0.8), H(0, DY, 1.25)), (16.9, H(0.25, 0.55, 0.85), H(0, DY - 0.3, 1.4))], lens=32, fstop=None)
 
 # ================================================================ 3. BEDROOM (night)  16.9-22.79
 if SET == 'bed':
@@ -189,20 +240,36 @@ if SET == 'bed':
     for c, e1 in ((wife, 'worried'), (hus, 'worried')):
         c.rest(F(16.9)); c.sit(F(16.9)); c.emote(F(17.0), e1); c.blinks(16.9, 22.8, 2.6)
         c.pose(F(16.9), {'head': (0, 0, math.radians(-25 if c is wife else -15))})
-    hus.emote(F(20.8), 'scared')
-    # bat: its own animated object (handle = the thin +Z end). It lies on the blanket under his hand, then he raises it upright with both
-    # mittens on the handle, barrel tilted away from his wife (bone-parented, it stuck out sideways across her face).
+    T_SLEEP = 20.77   # "People sleep with baseball bats": cut to a top view of the couple asleep, him hugging the bat
+    # bat: its own object (handle = the thin +Z end). Lies on the blanket under his hand while they sit up listening; in the top view he hugs it.
     batm = mat('bat', '#d8a868', 0.35, 0.3); bat = cyl(C, (0, 0, 0), 0.035, 0.8, batm, r2=0.018, name='bat')
     def bat_at(t, grip, d):   # grip = handle end (world), d = unit vector from barrel to handle
         d = V(d).normalized(); key(bat, 'location', F(t), V(grip) - d * 0.37); key(bat, 'rotation_euler', F(t), d.to_track_quat('Z', 'Y').to_euler())
-    LIE_G, LIE_D = (0.32, 0.55, 0.905), (0, 1, 0); UP_G, UP_D = V((0.6, 0.65, 1.05)), V((-0.45, -0.4, -1)).normalized()   # gripped at his far side, barrel up and away from both faces
-    bat_at(16.9, LIE_G, LIE_D); bat_at(20.4, LIE_G, LIE_D); bat_at(21.0, UP_G, UP_D); bat_at(22.8, UP_G, UP_D)
+    LIE_G, LIE_D = (0.32, 0.55, 0.905), (0, 1, 0)
+    HUG_G, HUG_D = V((0.31, 1.12, 0.985)), V((-0.25, 0.75, 0.0)).normalized()   # handle under his chin, barrel down across his chest to his far hip
+    bat_at(16.9, LIE_G, LIE_D); bat_at(T_SLEEP - 0.04, LIE_G, LIE_D); bat_at(T_SLEEP, HUG_G, HUG_D); bat_at(22.8, HUG_G, HUG_D)
     wife.hand('L', F(16.9), (-0.3, 0.55, 0.95)); wife.hand('R', F(16.9), (-0.52, 0.55, 0.95))
-    hus.hand('R', F(16.9), LIE_G); hus.hand('R', F(20.4), LIE_G); hus.hand('R', F(21.0), tuple(UP_G - UP_D * 0.12))
-    hus.hand('L', F(16.9), (0.55, 0.6, 0.88)); hus.hand('L', F(20.4), (0.55, 0.6, 0.88)); hus.hand('L', F(21.0), tuple(UP_G))
+    hus.hand('R', F(16.9), LIE_G); hus.hand('L', F(16.9), (0.55, 0.6, 0.88))
+    for c in (wife, hus): c.show(1, True); c.show(F(T_SLEEP), False)   # the first visibility key is held back to frame 1, so key "visible" first
+    # sleepers: same couple lying on their backs (armature rotated -90 deg about X: local (x, y, z) -> world (x, z, -y) + loc), eyes closed
+    blanket = [o for o in C.objects if o.name.startswith('box') and o.data.materials and o.data.materials[0].name == 'blanket']
+    for o in blanket: key_vis(o, 1, True); key_vis(o, F(T_SLEEP), False)
+    b2k = box(C, (0, -0.07, 0.72), (1.76, 0.95, 0.3), mat('blanket', '#d9643f', 0.75), 0.12, name='blanket2'); key_vis(b2k, 1, False); key_vis(b2k, F(T_SLEEP), True)
+    sw = Character(C, 'sleepw', (-0.42, -0.2, 0.76), 0, skin='#f3c7a5', hair='#c8742c', hair_style='bob', shirt='#e8a0b8', pants='#e8a0b8')
+    sm = Character(C, 'sleepm', (0.42, -0.2, 0.76), 0, hair='#2a1c12', hair_style='tuft', shirt='#9ab8e0', pants='#9ab8e0', moustache=True)
+    for c in (sw, sm):
+        c.arm.rotation_euler = (-math.pi / 2, 0, 0); c.rest(F(16.9)); c.emote(F(16.95), 'asleep'); c.show(1, False); c.show(F(T_SLEEP), True)
+        for sd, x in (('L', 1), ('R', -1)): c.ik[sd][1].location = (x * 0.8, -0.3, 0.95)   # elbows out to the sides, not down into the mattress
+    sw.pose(F(16.9), {'head': (0, 0, math.radians(-20))})   # head turned toward him
+    for o in C.objects:
+        if o.name.startswith(('sleepw_shoe', 'sleepm_shoe')): key_vis(o, 1, False); key_vis(o, F(T_SLEEP), False)   # no shoes in bed (they poked through the blanket)
+    for t in (T_SLEEP, 22.8):   # both mittens wrapped over the bat
+        sm.hand('R', F(t), tuple(HUG_G - HUG_D * 0.14 + V((0, 0, 0.045)))); sm.hand('L', F(t), tuple(HUG_G - HUG_D * 0.4 + V((0.02, 0, 0.045))))
+    for f, s_ in ((F(T_SLEEP), 1.0), (F(21.8), 1.03), (F(22.8), 1.0)): key(sm.arm, 'scale', f, V((1, s_, 1)))   # slow breathing (local Y = chest depth when lying)
     for f, e in ((F(22.45), 120), (F(22.62), 0)): key(blight.data, 'energy', f, e)
     shot(sc, C, 'b1', 16.9, [(16.9, (-2.2, -1.75, 0.9), (-2.86, -0.95, 0.8)), (19.5, (-2.25, -1.6, 0.88), (-2.86, -0.95, 0.8))], lens=55, fstop=2.0)
-    shot(sc, C, 'b2', 19.55, [(19.55, (0.3, -2.4, 1.35), (0, 0.9, 1.1)), (22.79, (0.45, -1.7, 1.3), (0.4, 0.95, 1.2))], lens=45, fstop=2.8)
+    shot(sc, C, 'b2', 19.55, [(19.55, (0.3, -2.4, 1.35), (0, 0.9, 1.1)), (T_SLEEP - 0.03, (0.4, -2.0, 1.32), (0.2, 0.92, 1.15))], lens=45, fstop=2.8)
+    shot(sc, C, 'b3', T_SLEEP, [(T_SLEEP, (0.12, 0.5, 3.4), (0.12, 0.6, 0.75)), (22.79, (0.2, 0.62, 3.0), (0.2, 0.7, 0.75))], lens=28, fstop=None)   # straight down on the bed
 
 # ================================================================ 4. CASE OFFICE 1986 (night, desk lamp)  22.79-32.18
 if SET == 'case':
@@ -214,11 +281,6 @@ if SET == 'case':
     for i, (u, v) in enumerate(PINS):
         p = sphere(C, (-1.2 + (u - 0.5) * 1.3, 1.94, 1.65 + (0.5 - v) * 1.45), 0.025, pin_m, seg=16)
         key(p, 'scale', 1, V((0.001,) * 3)); key(p, 'scale', F(23.07 + i * 0.16), V((0.001,) * 3)); key(p, 'scale', F(23.25 + i * 0.16), V((1, 1, 1)))
-    # calendar beside the detective, not behind his head (the flip to 1986 was hidden)
-    cals = {y: board(C, (1.32, 1.97, 1.85), (0.42, 0.56), os.path.join(TEX, f'cal{y}.png'), '#fbf8f0') for y in (1976, 1979, 1982, 1984, 1986)}
-    for i, (y, o) in enumerate(cals.items()):   # calendar flips 1976 -> 1986
-        t_on = 25.7 + i * 0.35; o.location.y -= 0.002 * i
-        key_vis(o, 1, i == 0); key_vis(o, F(t_on), True)
     desk(C, (0.5, 0.2, 0), w=1.6, d=0.8); lamp_bulb = desk_lamp(C, (1.0, 0.35, 0.785), '#3a6a4a')
     bag = box(C, (0.25, -0.05, 0.8), (0.24, 0.32, 0.01), mat('bag', '#eaf2f8', 0.1, 1.0, alpha=0.6), 0.004, name='bag')
     plane(C, (0.27, 0.0, 0.808), (0.12, 0.06), image_mat('evid', os.path.join(TEX, 'evidence.png')), rot=(0, 0, 0))
@@ -229,13 +291,35 @@ if SET == 'case':
     look_night(sc, C, (1.15, 0.35, 1.25), (0.5, 0.6, 1.3), window_dir=(-0.6, 1, 0.6))
     spot(C, (-1.2, 1.2, 2.9), (-1.2, 1.97, 1.6), '#ffe2b8', 160, 55, 0.7, 0.1)
     point(C, (0, -1.0, 2.8), '#ffd8a8', 60, 0.5)
-    det86 = Character(C, 'det86', (0.55, 0.85, -0.12), 0, hair='#5a4030', hair_style='side', shirt='#e8e4d8', tie='#7a3a2a', moustache=True, skin='#e8b796', pants='#5a4a3a')
-    det86.rest(F(22.8)); det86.blinks(22.8, 32.2, 3.0)
-    for t, e in ((22.9, 'worried'), (25.6, 'thinking'), (28.0, 'sad'), (30.3, 'surprised'), (31.0, 'determined')): det86.emote(F(t), e)
-    det86.hand('L', F(22.8), (0.72, 0.52, 0.86)); det86.hand('R', F(22.8), (0.36, 0.52, 0.86))   # within reach, resting on the desk (were floating)
-    det86.pose(F(22.8), {'head': (0, 0, 0)}); det86.pose(F(25.6), {'head': (0, 0, math.radians(25))}); det86.pose(F(26.5), {'head': (0, 0, math.radians(30))}); det86.pose(F(28), {'head': (math.radians(10), 0, 0)})
+    # ---- c2 "Then, in 1986, he just stops. Gone.": the killer slumped in an armchair in a dark living room, doing nothing but watching TV,
+    # the wall calendar flipping 1976 -> 1986 behind him; on "Gone." he flickers out and leaves an empty chair. Built at x=30.
+    OX = 30.0
+    def R_(x, y, z): return (OX + x, y, z)
+    rwall = mat('lrwall', '#4a4038', 0.85)
+    plane(C, R_(0, 0, 0.001), (5.2, 4.4), mat('lrfloor', '#5a4030', 0.5)); box(C, R_(0, 0, 2.65), (5.2, 4.4, 0.1), rwall, 0)
+    box(C, R_(0, 1.55, 1.3), (5.2, 0.1, 2.6), rwall, 0); box(C, R_(-2.6, 0, 1.3), (0.1, 4.4, 2.6), rwall, 0); box(C, R_(2.6, 0, 1.3), (0.1, 4.4, 2.6), rwall, 0)
+    chm = mat('armchair', '#7a3a34', 0.7, 0.1)
+    box(C, R_(0, 0.62, 0.17), (0.95, 0.85, 0.34), chm, 0.05); box(C, R_(0, 0.6, 0.39), (0.85, 0.75, 0.12), chm, 0.05)                  # base + cushion (top 0.45)
+    box(C, R_(0, 1.0, 0.8), (0.95, 0.16, 0.85), chm, 0.06); [box(C, R_(sx * 0.47, 0.62, 0.52), (0.14, 0.85, 0.36), chm, 0.05) for sx in (-1, 1)]  # back + arms (top 0.7)
+    box(C, R_(0, -1.6, 0.3), (1.0, 0.5, 0.6), mat('tvstand', '#3a2a20', 0.5), 0.02); box(C, R_(0, -1.6, 0.86), (0.8, 0.45, 0.52), mat('tvbody', '#2a2622', 0.4, 0.2), 0.04)
+    plane(C, R_(0, -1.37, 0.86), (0.64, 0.4), mat('tvscreen', '#b8d0ff', 0.2, emit='#b8d0ff', emit_s=3.0), rot=(math.pi / 2, 0, math.pi))
+    tvl = area(C, R_(0, -1.3, 0.95), R_(0, 0.6, 1.0), 0.6, '#9fc0ff', 80, 'tvlight')
+    for f in range(F(25.5), F(30.3), 3):   # soft TV flicker (no strobing)
+        key(tvl.data, 'energy', f, 120 + 35 * math.sin(f * 0.7) + 20 * math.sin(f * 1.9))
+    point(C, R_(1.6, 1.0, 2.3), '#ffb070', 12, 0.3)   # faint warm bounce so the room is not pure black
+    cals = {y: board(C, R_(0.98, 1.47, 1.55), (0.42, 0.56), os.path.join(TEX, f'cal{y}.png'), '#fbf8f0') for y in (1976, 1979, 1982, 1984, 1986)}
+    for i, (y, o) in enumerate(cals.items()):   # calendar flips 1976 -> 1986 (years pass, he does nothing)
+        t_on = 25.9 + i * 0.4; o.location.y -= 0.002 * i
+        key_vis(o, 1, i == 0); key_vis(o, F(t_on), True)
+    spot(C, R_(0.4, 0.3, 2.5), R_(0.98, 1.47, 1.55), '#ffe2c0', 25, 40, 0.8, 0.1)   # just enough to read the calendar
+    v86 = Character(C, 'vil86', R_(0, 0.58, -0.31), 0, skin='#1a1d26', shirt='#14161c', pants='#1a1c22', shoes='#0c0c0c', hair_style='none', hood='#121419', eyes='#c8c0a8')
+    v86.rest(F(25.4)); v86.sit(F(25.4)); v86.emote(F(25.5), 'neutral'); v86.blinks(25.6, 29.3, 2.2)
+    v86.pose(F(25.4), {'spine': (math.radians(-12), 0, 0), 'head': (math.radians(6), 0, 0)})   # slumped back
+    for sd, x in (('L', 1), ('R', -1)): v86.hand(sd, F(25.4), R_(x * 0.13, 0.3, 0.64))   # mittens resting on his lap
+    for t, vis in ((1, True), (29.43, False), (29.53, True), (29.63, False), (29.7, True), (29.78, False)): v86.show(F(t), vis)   # flickers out on "Gone."
     shot(sc, C, 'c1', 22.79, [(22.79, (-1.2, -0.75, 1.6), (-1.2, 1.97, 1.6)), (25.5, (-1.2, -0.5, 1.6), (-1.2, 1.97, 1.6))], lens=35, fstop=None)
-    shot(sc, C, 'c2', 25.55, [(25.55, (0.9, -2.1, 1.4), (0.9, 1.0, 1.55)), (30.2, (0.9, -1.8, 1.42), (0.9, 1.0, 1.55))], lens=40, fstop=4)
+    # from just behind the TV: its dark back in the foreground, the screen glow on him
+    shot(sc, C, 'c2', 25.55, [(25.55, R_(-0.5, -3.3, 1.75), R_(0.2, 0.55, 0.95)), (30.2, R_(-0.45, -3.05, 1.72), R_(0.2, 0.55, 0.95))], lens=32, fstop=None)
     shot(sc, C, 'c3', 30.25, [(30.25, (0.45, -0.75, 1.25), (0.25, -0.05, 0.81)), (32.18, (0.32, -0.32, 1.0), (0.24, -0.06, 0.81))], lens=50, fstop=2.0)
 
 # ================================================================ 5. DNA (bright, stylised)  32.18-37.73
@@ -315,14 +399,33 @@ if SET == 'office':
     # det1 types on the keyboard in front of her (targets within reach; the old ones were past the monitor and the mittens floated)
     for t, p in ((47.6, (-1.15, 0.95, 0.88)), (52.0, (-1.15, 0.95, 0.88)), (52.3, (-0.97, 1.0, 0.9)), (56.4, (-0.97, 1.0, 0.9)), (56.8, (-1.15, 0.95, 0.88))): det1.hand('R', F(t), p)
     for t, p in ((47.6, (-0.85, 0.95, 0.88)), (52.3, (-0.73, 1.0, 0.9)), (56.4, (-0.73, 1.0, 0.9)), (56.8, (-0.85, 0.95, 0.88))): det1.hand('L', F(t), p)
-    det2.hand('R', F(48.5), (-0.2, 1.05, 1.05), 0); det2.hand('R', F(49.0), (-0.15, 0.98, 1.42), 1); det2.hand('R', F(51.0), (-0.15, 0.98, 1.42), 1); det2.hand('R', F(51.5), (-0.2, 1.05, 1.05), 0)
+    # det2 studies the killer's case file through a magnifying glass (shows "detective" at a glance), then sets it down when they get the idea
+    box(C, (-0.06, 0.9, 0.792), (0.36, 0.27, 0.012), mat('cfolder', '#d8b878', 0.7), 0.003)
+    plane(C, (-0.08, 0.9, 0.8), (0.19, 0.25), image_mat('casefile', os.path.join(TEX, 'wanted.png'), rough=0.7))
+    for i in range(3): box(C, (-0.05 + 0.01 * i, 0.93, 0.786 - 0.004 * i), (0.22, 0.28, 0.003), mat('cpaper', '#f4f0e4', 0.8), 0)
+    mag = bpy.data.objects.new('magroot', None); C.objects.link(mag)
+    glassm = mat('magglass', '#dff0ff', 0.03, 0.8, alpha=0.1); rimm = mat('magrim', '#2a2a30', 0.3, metal=0.8); hdlm = mat('maghdl', '#5a3420', 0.5)
+    mparts = [torus(C, (0, 0, 0), 0.055, 0.008, rimm, name='magrim'), cyl(C, (0, 0, 0), 0.052, 0.004, glassm, name='maglens')] + capsule(C, (0, 0.06, 0.004), (0, 0.17, 0.03), 0.012, hdlm, 'maghdl')
+    for o in mparts: mw = o.matrix_world.copy(); o.parent = mag; o.matrix_world = mw
+    mag.scale = (1.6, 1.6, 1.6); MAG_W = V((0, 0.18, 0.04)) * 1.6   # big readable lens; wrist target relative to the lens centre, so the mitten closes round the handle
+    for t, p in ((47.6, (-0.1, 0.9, 0.9)), (48.6, (-0.02, 0.86, 0.905)), (49.5, (-0.1, 0.84, 0.895)), (50.4, (-0.03, 0.9, 0.9)), (51.0, (-0.05, 0.88, 0.9)),
+                 (51.4, (-0.03, 0.86, 0.96)), (51.9, (0.06, 0.84, 0.8)), (56.9, (0.06, 0.84, 0.8))):
+        key(mag, 'location', F(t), V(p))
+        if t <= 51.9: det2.hand('R', F(t), tuple(V(p) + MAG_W), 1)
+    det2.hand('R', F(52.4), (-0.25, 1.15, 0.9), 0)   # lets go, arm hangs
+    det2.hand('L', F(47.6), (0.06, 0.98, 0.86), 1); det2.hand('L', F(51.2), (0.06, 0.98, 0.86), 1); det2.hand('L', F(51.6), (0.1, 1.1, 0.9), 0)   # other mitten on the folder
+    det2.pose(F(47.6), {'head': (math.radians(22), 0, 0)}); det2.pose(F(50.9), {'head': (math.radians(22), 0, 0)}); det2.pose(F(51.4), {'head': (0, 0, math.radians(-10))})
+    for k, t in enumerate([52.45 + 0.17 * j for j in range(23)]):   # det1 types: mittens tap the keyboard alternately
+        for sd, base in (('R', V((-0.97, 1.0, 0.9))), ('L', V((-0.73, 1.0, 0.9)))):
+            up = 0.028 if (k + (sd == 'L')) % 2 == 0 else 0.0; det1.hand(sd, F(t), tuple(base + V((0.01 * math.sin(k * 1.7), 0, up))))
     # face the desk until he sets off (walk()'s first rotation key at 56.8 was held from frame 1, so he stood sideways all along)
     det2.place(F(47.6), (-0.1, 1.3, 0), 0.0); det2.place(F(56.5), (-0.1, 1.3, 0), 0.0)
     det2.walk(56.8, 58.3, (-0.1, 1.3), (0.55, 1.65)); det2.place(F(58.4), (0.55, 1.65, 0), math.radians(-60))
     for t0, t1, (u, v) in ((66.6, 70.9, (0.3, 0.55)), (71.3, 73.4, (0.74, 0.6))):
         p = (1.4 + (u - 0.5) * 1.1, 2.0, 1.65 + (0.5 - v) * 1.92)
         det2.hand('L', F(t0), (0.8, 1.7, 0.9), 0); det2.hand('L', F(t0 + 0.4), p, 1); det2.hand('L', F(t1 - 0.4), p, 1); det2.hand('L', F(t1), (0.8, 1.7, 0.9), 0)
-    shot(sc, C, 'o1', 47.65, [(47.65, (-0.5, -2.2, 1.45), (-0.5, 1.2, 1.35)), (52.15, (-0.5, -1.9, 1.45), (-0.5, 1.2, 1.35))], lens=45, fstop=2.8)
+    shot(sc, C, 'o0', 47.65, [(47.65, (-0.02, 0.28, 1.3), (-0.06, 0.9, 0.84)), (49.8, (-0.03, 0.38, 1.24), (-0.06, 0.9, 0.84))], lens=40, fstop=2.8)   # insert: lens over the case file
+    shot(sc, C, 'o1', 49.85, [(49.85, (-0.45, -2.1, 1.45), (-0.45, 1.2, 1.35)), (52.15, (-0.45, -1.85, 1.45), (-0.45, 1.2, 1.35))], lens=45, fstop=2.8)
     shot(sc, C, 'o2', 52.2, [(52.2, (-0.55, 2.0, 1.5), (-0.6, 0.91, 1.1)), (56.55, (-0.56, 1.85, 1.45), (-0.6, 0.91, 1.1))], lens=36, fstop=4)
     # wall chart: one slow push on the whole chart (the old punch-ins cropped the COUSIN / KILLER'S DNA labels); the chart video itself steps through
     # cousins -> shared DNA -> 1800s. o7 is a gentler punch-in on THIS MAN.
@@ -335,20 +438,48 @@ if SET == 'suburb':
     sc, C = scene('suburb', [(73.31, 88.37)])
     plane(C, (0, 0, 0), (60, 60), mat('grassd', '#5fae48', 0.7)); plane(C, (0, 0, 0.005), (4, 60), mat('roadd', '#5a5f6a', 0.6))
     house(C, (8.2, 0.5, 0), '#f4e0b0', '#7a5a8a', rotz=math.pi / 2); tree(C, (4.6, 3.5, 0), 3); tree(C, (4.6, -3.0, 0), 2.6)
-    store = box(C, (-7.5, -9, 1.7), (4, 8, 3.4), mat('storew', '#f4f0e6', 0.6), 0.1)
+    # ---- grocery store: a real hollow shop (front wall with door + window openings, lit interior with stocked shelves), not a solid block
+    stw = mat('storew', '#f4f0e6', 0.6); FX = -5.55   # front wall x
+    for y0, y1, z0, z1 in ((-13, -12.4, 0, 3.4), (-12.4, -10.8, 0, 0.6), (-12.4, -10.8, 2.2, 3.4), (-10.8, -10.5, 0, 3.4), (-10.5, -9.1, 2.2, 3.4),
+                           (-9.1, -7.4, 0, 3.4), (-7.4, -5.6, 0, 0.6), (-7.4, -5.6, 2.2, 3.4), (-5.6, -5.0, 0, 3.4)):
+        box(C, (FX, (y0 + y1) / 2, (z0 + z1) / 2), (0.1, y1 - y0, z1 - z0), stw, 0)
+    winm = mat('storewin', '#d8eefa', 0.05, 0.6, alpha=0.18)
+    for yc in (-11.6, -6.5): box(C, (FX, yc, 1.4), (0.02, 1.6, 1.6), winm, 0)
+    box(C, (-7.5, -13.0, 1.7), (4.1, 0.1, 3.4), stw, 0); box(C, (-7.5, -5.0, 1.7), (4.1, 0.1, 3.4), stw, 0); box(C, (-9.5, -9, 1.7), (0.1, 8, 3.4), stw, 0)
+    box(C, (-7.5, -9, 3.45), (4.2, 8.2, 0.12), mat('roof', '#d8d0c4', 0.6), 0.03); plane(C, (-7.5, -9, 0.008), (4, 8), mat('tiles', '#e8e2d6', 0.35, 0.3))
+    for yc in (-10.6, -7.4): area(C, (-7.5, yc, 3.3), (-7.5, yc, 0), 2.2, '#fff4e0', 500, 'shoplight')
+    palette = ['#e8503c', '#f2c14e', '#3a7ca5', '#5fb36b', '#f08a4b', '#c85a8a', '#ffffff', '#7a5cc8']; k = 0
+    shelfm = mat('shelfm', '#c8ccd4', 0.4, metal=0.4)
+    for yc in (-12.2, -8.3, -6.0):   # three shelf units running into the shop, stocked on both faces
+        box(C, (-7.6, yc, 0.85), (2.6, 0.12, 1.7), shelfm, 0.01)
+        for zb in (0.12, 0.62, 1.12, 1.62): box(C, (-7.6, yc, zb), (2.6, 0.5, 0.03), shelfm, 0.005)
+        for zb in (0.12, 0.62, 1.12):
+            for side in (-1, 1):
+                for j in range(11):
+                    k += 1; h = 0.16 + 0.08 * ((k * 7) % 3) / 2
+                    box(C, (-8.75 + j * 0.23, yc + side * 0.15, zb + 0.015 + h / 2), (0.17, 0.16, h), mat('prod' + str(k % 8), palette[k % 8], 0.45, 0.2), 0)
+    box(C, (-6.3, -11.7, 0.5), (0.7, 1.0, 1.0), mat('counter', '#5fae8a', 0.5), 0.02)   # checkout
     # sign facing the street: frame AND face rotated together (board() + rotating only the face left the frame sticking out and hiding the sign)
     box(C, (-5.47, -9, 3.0), (0.04, 3.08, 0.68), mat('bframe#2fa86a', '#2fa86a', 0.4), 0.01)
     sg = plane(C, (-5.44, -9, 3.0), (3.0, 0.6), image_mat('img_grocery.png', os.path.join(TEX, 'grocery.png'), rough=0.6), rot=(math.pi / 2, 0, math.pi / 2))
-    # dark doorway in the (solid) store front: he steps "inside" behind it instead of into a wall
-    plane(C, (-5.488, -9.8, 1.1), (1.4, 2.2), mat('doorway', '#1c1a18', 0.9, emit='#3a3026', emit_s=0.4), rot=(math.pi / 2, 0, math.pi / 2), name='doorway')
-    sdoor = box(C, (-5.47, -9.8, 1.1), (0.06, 1.4, 2.2), mat('storedoor', '#9fc8e8', 0.08, 1.0), 0.03, name='storedoor')
-    for t, y in ((83.4, -9.8), (84.0, -11.1), (85.0, -11.1), (85.6, -9.8)): key(sdoor, 'location', F(t), V((-5.42 if y < -10 else -5.47, y, 1.1)))   # automatic door slides open (he walked through the glass)
-    for dy in (-11.5, -6.6): box(C, (-5.47, dy, 1.4), (0.06, 1.8, 1.5), mat('storewin', '#bfe0f4', 0.08, 1.0), 0.03)
-    car(C, (-3.9, -10.4, 0), '#b8c8d8'); box(C, (-2.98, -10.15, 0.86), (0.04, 0.17, 0.045), METAL, 0.015, name='handle'); car(C, (-1.1, 4.5, 0), '#e8e4da', math.pi)
+    sdoor = box(C, (0, 0, 0), (0.04, 1.4, 2.2), mat('storedoor', '#d8eefa', 0.05, 0.6, alpha=0.2), 0.02, name='storedoor')
+    for t, y in ((1.0, -9.8), (83.95, -9.8), (84.35, -11.15), (85.3, -11.15), (85.7, -9.8)): key(sdoor, 'location', F(t), V((-5.46, y, 1.1)))   # automatic door slides open for him
+    plane(C, (-3.6, -9.0, 0.004), (3.6, 10), mat('lot', '#4a4e56', 0.7))   # parking lot
+    for yl in (-12.6, -8.2): plane(C, (-3.6, yl, 0.006), (2.6, 0.08), mat('lotline', '#f4f4f4', 0.6))
+    # his car: drives in and parks (rigged), windows see-through so he is visible at the wheel
+    mycar = car(C, (-3.9, -10.4, 0), '#b8c8d8', rig=True, see_through=True)
+    hdl = box(C, (0, 0, 0), (0.04, 0.17, 0.045), METAL, 0.015, name='handle'); hdl.location = (-2.98, -10.15, 0.86)
+    bpy.context.view_layer.update(); mw = hdl.matrix_world.copy(); hdl.parent = mycar; hdl.matrix_parent_inverse = mycar.matrix_world.inverted(); hdl.matrix_world = mw
+    drv = Character(C, 'drv', (-4.3, -10.65, -0.52), 0, skin='#efc4a4', hair='#e0e0e0', hair_style='bald', shirt='#c8b48a', pants='#6a6a6a', eyes='#5a6a7a')
+    bpy.context.view_layer.update(); mw = drv.arm.matrix_world.copy(); drv.arm.parent = mycar; drv.arm.matrix_parent_inverse = mycar.matrix_world.inverted(); drv.arm.matrix_world = mw
+    drv.rest(F(82.3)); drv.emote(F(82.35), 'calm'); drv.show(1, False); drv.show(F(82.45), True); drv.show(F(83.62), False)
+    for t, (x, y), r in ((1.0, (-1.0, -2.0), -0.27), (82.45, (-1.0, -2.0), -0.27), (83.25, (-3.72, -9.55), -0.05), (83.55, (-3.9, -10.4), 0.0)):
+        key(mycar, 'location', F(t), V((x, y, 0))); key(mycar, 'rotation_euler', F(t), V((0, 0, r)))
+    car(C, (-1.1, 4.5, 0), '#e8e4da', math.pi)
     for y in (-2.5, 2.5): box(C, (4.5, y, 0.45), (0.06, 0.06, 0.9), mat('mbox', '#2f5fa8', 0.4), 0.02)
     look_day(sc, C, (2, -2, 1), sun_dir=(0.7, 0.5, -0.6))
     old = Character(C, 'old', (4.7, 0.3, 0), -math.pi / 2 + 0.5, skin='#efc4a4', hair='#e0e0e0', hair_style='bald', shirt='#c8b48a', pants='#6a6a6a', eyes='#5a6a7a', scale=1.0)
-    old.rest(F(73.3)); old.emote(F(73.4), 'calm'); old.blinks(73.3, 85, 3.4); bpy.context.view_layer.update(); old.hand('R', F(73.3), tuple(old.arm.matrix_world @ V((-0.12, -0.35, 0.95))))
+    old.rest(F(73.3)); old.emote(F(73.4), 'calm'); old.blinks(73.3, 88.3, 3.4); bpy.context.view_layer.update(); old.hand('R', F(73.3), tuple(old.arm.matrix_world @ V((-0.12, -0.35, 0.95))))
     # hose nozzle in his mitten, a hose back to the house and a visible water arc onto the lawn (the preview showed only a tiny green stick)
     M_OLD = old.arm.matrix_world.copy(); HANDW = M_OLD @ V((-0.12, -0.35, 0.95)); WDIR = (M_OLD.to_3x3() @ V((-0.45, -1.0, 0.3))).normalized()
     nozzle = cyl(C, tuple(HANDW + WDIR * 0.07), 0.022, 0.16, mat('noz', '#2fa86a', 0.3), rot=tuple(WDIR.to_track_quat('Z', 'Y').to_euler()), name='nozzle')
@@ -361,9 +492,12 @@ if SET == 'suburb':
         if p.z < 0.02 or k > 200: break
         wet.append(sphere(C, tuple(p), 0.014, water, seg=12, name='drop'))
     wet.append(cyl(C, (p.x, p.y, 0.012), 0.18, 0.01, water, name='puddle'))
-    old.place(F(73.3), (4.7, 0.3, 0), -math.pi / 2 + 0.5); old.place(F(82.45), (4.7, 0.3, 0), -math.pi / 2 + 0.5); old.place(F(82.5), (-5.05, -10.2, 0), -math.pi / 2); old.walk(82.9, 84.7, (-5.05, -10.2), (-5.75, -9.8))
+    # off the lawn while he drives (the driver double is in the car), then out of the parked car, through the sliding door, to a shelf inside
+    old.place(F(73.3), (4.7, 0.3, 0), -math.pi / 2 + 0.5); old.place(F(83.58), (4.7, 0.3, 0), -math.pi / 2 + 0.5)
+    old.show(1, True); old.show(F(82.45), False); old.show(F(83.62), True); old.hand('R', F(83.58), (-5.0, -10.6, 0.7), 0)
+    old.place(F(83.6), (-5.05, -10.95, 0), 3.32); old.walk(83.65, 84.4, (-5.05, -10.95), (-5.2, -9.85), 0.5)
+    old.walk(84.45, 85.35, (-5.2, -9.85), (-6.75, -9.7), 0.5); old.place(F(85.45), (-6.75, -9.7, 0), math.radians(-60)); old.place(F(85.9), (-6.75, -9.7, 0), math.pi)   # turns to the shelf
     for o in wet: key_vis(o, F(82.4), True); key_vis(o, F(82.5), False)
-    for o in old.parts: key_vis(o, F(84.75), True); key_vis(o, F(84.8), False)
     d1s = Character(C, 'd1s', (0.2, 6.4, 0), math.radians(70), skin='#c98f6a', hair='#2a1a12', hair_style='bun', shirt='#f2efe6', coat='#6a5a8a', pants='#2a2e3a')
     d2s = Character(C, 'd2s', (0.1, 5.6, 0), math.radians(60), hair='#7a7a7a', hair_style='side', shirt='#e8e8e0', tie='#2f4f8a', glasses=True, skin='#f0c09a', pants='#3a3f52')
     for c in (d1s, d2s): c.rest(F(73.3)); c.emote(F(73.4), 'determined'); c.blinks(73.3, 88.4, 3.0)
@@ -373,10 +507,12 @@ if SET == 'suburb':
     for sd, dx in (('L', 0.07), ('R', -0.07)): d2s.hand(sd, F(73.3), tuple(d2s.arm.matrix_world @ V((dx, -0.33, 1.63))))
     officer = Character(C, 'officer', (-1.6, -10.05, 0), -math.pi / 2, skin='#8a5a3c', hair_style='none', shirt='#2f4f8a', pants='#1d2a4a', eyes='#3a2a1a', cap='#1d2a4a')
     officer.rest(F(84.5)); officer.emote(F(84.6), 'determined'); officer.walk(84.6, 85.25, (-1.6, -10.05), (-2.55, -10.05))
+    officer.show(1, False); officer.show(F(84.55), True)   # arrives only once the old man is inside (he stood in the lot all along)
+    officer.hand('L', F(84.5), (-1.5, -10.3, 0.75), 0); officer.hand('L', F(85.3), (-2.6, -10.2, 0.8), 0)   # arm hangs while he walks, then reaches
     # swab: its own object wiping the handle; the officer's hand follows the top of the stick
     TIP = V((-2.99, -10.15, 0.86)); TOPO = V((0.14, 0.0, 0.11))
     swab2 = bpy.data.objects.new('swabrig', None); C.objects.link(swab2)
-    stick = capsule(C, (0, 0, 0), tuple(TOPO), 0.006, mat('stick', '#f4f4f4', 0.4), 'stick'); bud2 = sphere(C, (0, 0, 0), 0.02, mat('cotton', '#ffffff', 0.9), (1.7, 1, 1), seg=16)
+    stick = capsule(C, (0, 0, 0), tuple(TOPO), 0.01, mat('stick', '#f4f4f4', 0.4), 'stick'); bud2 = sphere(C, (0, 0, 0), 0.032, mat('cotton', '#ffffff', 0.9), (1.7, 1, 1), seg=16)   # bigger: it has to read
     for o in stick + [bud2]: o.parent = swab2
     key_vis(swab2, 1, False)
     for o in stick + [bud2]: key_vis(o, 1, False); key_vis(o, F(85.5), True)
@@ -388,7 +524,8 @@ if SET == 'suburb':
     shot(sc, C, 'u1', 73.31, [(73.31, (2.2, -1.9, 1.5), (4.7, 0.3, 1.4)), (79.9, (2.1, -0.9, 1.55), (4.7, 0.3, 1.4))], lens=45, fstop=2.8)
     shot(sc, C, 'u2', 79.95, [(79.95, (3.4, 4.6, 1.6), (0.15, 6.0, 1.5)), (82.45, (3.2, 4.75, 1.6), (0.15, 6.0, 1.5))], lens=45, fstop=2.8)   # both detectives in frame
     # high angle over the parked car, so he is seen entering the store (the car hid him) with the whole GROCERY sign in frame
-    shot(sc, C, 'u3', 82.5, [(82.5, (-3.3, -5.6, 2.2), (-5.4, -9.3, 1.8)), (85.0, (-3.45, -5.9, 2.15), (-5.4, -9.4, 1.75))], lens=32, fstop=None)
+    shot(sc, C, 'u3a', 82.5, [(82.5, (0.3, -15.8, 2.4), (-3.3, -7.5, 1.0)), (83.6, (0.1, -15.4, 2.35), (-3.7, -9.2, 1.0))], lens=35, fstop=None)   # his car pulls into the lot
+    shot(sc, C, 'u3', 83.65, [(83.65, (-3.3, -5.6, 2.2), (-5.4, -9.6, 1.5)), (85.0, (-3.45, -5.9, 2.15), (-5.8, -9.6, 1.45))], lens=32, fstop=None)    # out of the car, into the store
     # medium shot from beyond the car's nose at handle height: officer, swab and door handle all readable (the camera used to end 0.5 m from his back)
     shot(sc, C, 'u4', 85.05, [(85.05, (-1.5, -13.8, 1.15), (-2.85, -10.15, 0.95)), (88.37, (-1.65, -13.4, 1.05), (-2.95, -10.15, 0.88))], lens=50, fstop=2.8)
 
@@ -438,15 +575,50 @@ if SET == 'arrest':
     offc.rest(F(89.5)); offc.emote(F(89.6), 'determined'); offc.hand('R', F(89.5), (0.75, 0.4, 1.15))
     det1a = Character(C, 'det1a', (-0.45, 0.7, 0), math.radians(20), skin='#c98f6a', hair='#2a1a12', hair_style='bun', shirt='#f2efe6', coat='#6a5a8a', pants='#2a2e3a')
     det1a.rest(F(89.5)); det1a.emote(F(89.6), 'determined')
-    bpy.context.view_layer.update()
-    paper = plane(C, (0, 0, 0), (0.42, 0.56), image_mat('news', os.path.join(TEX, 'newspaper.png'), rough=0.8), rot=(math.pi / 2, 0, math.radians(20)))
-    P0 = det1a.arm.matrix_world @ V((0, -0.35, 0.95)); P1 = det1a.arm.matrix_world @ V((0, -0.45, 1.35))
-    key(paper, 'location', F(89.5), P0); key(paper, 'location', F(90.9), P0); key(paper, 'location', F(91.5), P1); key(paper, 'location', F(96.5), P1)
-    for sd, dx in (('L', 0.19), ('R', -0.19)):
-        for t, base in ((89.5, P0), (90.9, P0), (91.5, P1), (96.5, P1)): det1a.hand(sd, F(t), tuple(base + det1a.arm.matrix_world.to_3x3() @ V((dx, 0.01, -0.18))))
+    # ---- a3 flashback (post.py turns 93.4-96.45 black & white with grain): 1979, the young officer in a hardware aisle glances around,
+    # holds his jacket open with one mitten and slips a hammer, then a can of dog spray inside it. Built at x=60, roofed so the sun stays out.
+    OX = 60.0
+    def Q(x, y, z): return V((OX + x, y, z))
+    hw = mat('hwwall', '#b8b0a0', 0.8)
+    plane(C, Q(0, 0, 0.002), (4, 4), mat('hwfloor', '#8a8478', 0.5)); box(C, Q(0, 0, 2.75), (4, 4, 0.1), hw, 0)
+    box(C, Q(0, 1.05, 1.35), (4, 0.1, 2.7), hw, 0); box(C, Q(1.15, 0, 1.35), (0.1, 4, 2.7), hw, 0); box(C, Q(-1.6, 0, 1.35), (0.1, 4, 2.7), hw, 0)
+    box(C, Q(-0.3, 0.98, 1.6), (1.6, 0.03, 1.0), mat('pegboard', '#c8a070', 0.7), 0)   # pegboard with hanging tools
+    for i in range(6): box(C, Q(-0.95 + i * 0.26, 0.95, 1.55 + 0.12 * (i % 2)), (0.05, 0.03, 0.32), mat('peg' + str(i % 3), ['#3a3a40', '#8a3a2a', '#c8c8c8'][i % 3], 0.4, metal=0.5), 0.005)
+    area(C, Q(0.1, -0.3, 2.6), Q(0.1, -0.3, 0), 1.6, '#f4f8ff', 260, 'fluoro'); area(C, Q(-1.4, -1.8, 1.6), Q(0.2, 0.0, 1.2), 1.0, '#ffffff', 60, 'hwfill', shadow=False)
+    shm = mat('hwshelf', '#7a6a58', 0.5, 0.1)
+    box(C, Q(0.82, 0.15, 0.95), (0.4, 1.6, 0.04), shm, 0.005); box(C, Q(0.82, 0.15, 1.45), (0.4, 1.6, 0.04), shm, 0.005); box(C, Q(1.04, 0.15, 1.0), (0.04, 1.6, 2.0), shm, 0)
+    for yy in (-0.65, 0.95): box(C, Q(0.82, yy, 0.75), (0.4, 0.04, 1.5), shm, 0)
+    def hammer(name):   # grip at the origin; handle along local +y to a steel head across x
+        r = bpy.data.objects.new(name, None); C.objects.link(r)
+        for o in [cyl(C, (0, 0.06, 0), 0.016, 0.3, mat('hhandle', '#a87040', 0.5), rot=(math.pi / 2, 0, 0)), box(C, (0, 0.21, 0), (0.13, 0.04, 0.04), mat('hhead', '#4a4c52', 0.3, metal=0.9), 0.006)]: o.parent = r
+        return r
+    def spraycan(name):
+        r = bpy.data.objects.new(name, None); C.objects.link(r)
+        for o in [cyl(C, (0, 0, 0), 0.036, 0.17, mat('can', '#e8b838', 0.3, metal=0.6)), cyl(C, (0, 0, 0.1), 0.026, 0.035, mat('capred', '#d82a2a', 0.4))]: o.parent = r
+        return r
+    for i, yy in enumerate((0.35, 0.55, 0.75)): h_ = hammer('hamshelf'); h_.location = Q(0.7, yy, 0.985); h_.rotation_euler = (0, 0, -math.pi / 2)
+    for i, yy in enumerate((-0.5, -0.4, -0.3, -0.05)): c_ = spraycan('canshelf'); c_.location = Q(0.72 + 0.08 * (i % 2), yy, 1.06)
+    for i, yy in enumerate((0.0, 0.2, 0.45)): h_ = hammer('hamtop'); h_.location = Q(0.72, yy, 1.485); h_.rotation_euler = (0, 0, -math.pi / 2)
+    young = Character(C, 'young', tuple(Q(0.1, 0, 0)), 0.5, skin='#efc4a4', hair='#3a2418', hair_style='side', shirt='#2f4f8a', pants='#1d2a4a', eyes='#5a6a7a', cap='#1d2a4a', moustache=True)
+    young.rest(F(93.3)); young.emote(F(93.4), 'worried'); young.emote(F(94.2), 'determined'); young.emote(F(96.0), 'smug'); young.blinks(93.5, 96.4, 1.6)
+    for t, rz, rx in ((93.3, 0.0, 0.0), (93.6, 0.6, 0.0), (93.95, -0.55, 0.0), (94.2, 0.25, 0.2), (95.0, 0.2, 0.2), (95.3, 0.35, 0.15), (95.9, 0.35, 0.15), (96.15, -0.45, 0.0), (96.5, -0.45, 0.0)):
+        young.pose(F(t), {'head': (rx, 0, rz)})   # guilty glances left/right, eyes on the shelf, then a look straight at us
+    ham = hammer('hamstolen'); can = spraycan('canstolen')
+    TUCK = Q(0.2, -0.17, 1.02); GRIP_OFF = V((-0.05, 0, 0.05))   # in front of his chest; wrist target relative to the item
+    for t, p, r in ((93.3, Q(0.68, 0.05, 0.985), (0, 0, -math.pi / 2)), (94.5, Q(0.68, 0.05, 0.985), (0, 0, -math.pi / 2)), (94.95, TUCK, (math.pi / 2, 0, 0)), (95.1, TUCK - V((0, 0, 0.14)), (math.pi / 2, 0, 0))):
+        key(ham, 'location', F(t), p); key(ham, 'rotation_euler', F(t), V(r))
+    for t, p in ((93.3, Q(0.7, -0.15, 1.06)), (95.45, Q(0.7, -0.15, 1.06)), (95.85, TUCK + V((0, 0, 0.03))), (95.98, TUCK - V((0, 0, 0.12)))): key(can, 'location', F(t), p)
+    for o in [ham] + list(ham.children): key_vis(o, F(95.1), True); key_vis(o, F(95.15), False)
+    for o in [can] + list(can.children): key_vis(o, F(95.98), True); key_vis(o, F(96.03), False)
+    young.hand('L', F(93.3), tuple(Q(0.35, 0.1, 0.75)), 0); young.hand('L', F(94.15), tuple(Q(0.4, 0.05, 0.9)), 0)
+    young.hand('L', F(94.45), tuple(Q(0.68, 0.05, 0.985) + GRIP_OFF), 1); young.hand('L', F(94.5), tuple(Q(0.68, 0.05, 0.985) + GRIP_OFF), 1)
+    young.hand('L', F(94.95), tuple(TUCK + GRIP_OFF), 1); young.hand('L', F(95.1), tuple(TUCK - V((0, 0, 0.14)) + GRIP_OFF), 1)
+    young.hand('L', F(95.4), tuple(Q(0.7, -0.15, 1.06) + GRIP_OFF), 1); young.hand('L', F(95.45), tuple(Q(0.7, -0.15, 1.06) + GRIP_OFF), 1)
+    young.hand('L', F(95.85), tuple(TUCK + V((0, 0, 0.03)) + GRIP_OFF), 1); young.hand('L', F(95.98), tuple(TUCK - V((0, 0, 0.12)) + GRIP_OFF), 1); young.hand('L', F(96.3), tuple(Q(0.35, 0.1, 0.75)), 0)
+    young.hand('R', F(93.3), tuple(Q(0.0, 0.1, 0.75)), 0); young.hand('R', F(94.3), tuple(Q(0.11, -0.19, 1.08)), 1); young.hand('R', F(96.0), tuple(Q(0.11, -0.19, 1.08)), 1); young.hand('R', F(96.3), tuple(Q(0.0, 0.1, 0.75)), 0)   # holds his jacket open
     shot(sc, C, 'a1', 89.57, [(89.57, tuple(W0 + V((0.25, -1.3, 0.35))), tuple(W0 + V((0, 0, 0.25)))), (91.1, tuple(W0 + V((0.3, -1.55, 0.5))), tuple(W0 + V((0, 0, 0.35))))], lens=45, fstop=2.8)   # cuffs + his face
     shot(sc, C, 'a2', 91.15, [(91.15, (0.9, -2.0, 1.55), (0.5, 0.5, 1.5)), (93.35, (0.9, -1.8, 1.55), (0.5, 0.5, 1.5))], lens=45, fstop=2.8)
-    shot(sc, C, 'a3', 93.4, [(93.4, tuple(P1 + V((0.2, -1.4, 0.05))), tuple(P1)), (96.5, tuple(P1 + V((0.15, -0.95, 0.02))), tuple(P1))], lens=45, fstop=2.8)
+    shot(sc, C, 'a3', 93.4, [(93.4, tuple(Q(-0.8, -3.0, 1.55)), tuple(Q(0.38, 0.0, 1.2))), (96.5, tuple(Q(-0.7, -2.7, 1.52)), tuple(Q(0.36, 0.0, 1.2)))], lens=40, fstop=4)
 
 # ---------------------------------------------------------------- output
 def setup_engine(sc, engine, samples):

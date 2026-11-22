@@ -45,7 +45,9 @@ def sphere(coll, loc, r, m, scale=(1, 1, 1), seg=48, name='sph'):
     o.data.materials.append(m); _smooth(o); return _link(o, coll)
 def box(coll, loc, size, m, bevel=0.02, rot=(0, 0, 0), name='box'):
     bpy.ops.mesh.primitive_cube_add(location=loc, rotation=rot); o = bpy.context.object; o.name = name; o.scale = (size[0] / 2, size[1] / 2, size[2] / 2)
-    bpy.ops.object.transform_apply(scale=True)
+    # scale only: location/rotation default to True too, which baked the position into the mesh and left the object at the origin,
+    # so any box that was later animated (doors, drawers, cards) ended up offset by its own creation position
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     if bevel: md = o.modifiers.new('bevel', 'BEVEL'); md.width = bevel; md.segments = 4; md.limit_method = 'NONE'
     o.data.materials.append(m); _smooth(o)
     return _link(o, coll)
@@ -143,6 +145,7 @@ EMO = {   # brow raise (m), brow tilt (rad, + = angry inner-down), mouth: smile/
     'neutral': (0.0, 0.0, 'flat', 0.0), 'calm': (0.0, 0.0, 'smile', 0.05), 'happy': (0.01, -0.05, 'smile', 0.15), 'joy': (0.015, -0.1, 'open', 0.2),
     'thinking': (0.008, 0.12, 'flat', 0.15), 'worried': (0.012, -0.3, 'frown', 0.05), 'sad': (0.0, -0.35, 'frown', 0.3), 'scared': (0.02, -0.3, 'o', 0.0),
     'surprised': (0.025, 0.0, 'o', 0.0), 'determined': (-0.008, 0.25, 'flat', 0.2), 'menacing': (-0.012, 0.45, 'flat', 0.45), 'smug': (0.0, 0.15, 'smile', 0.3),
+    'asleep': (0.0, -0.05, 'flat', 1.67),   # lid 1.67 -> eye scale 0.08 = closed (same as a blink)
 }
 class Character:
     def __init__(s, coll, name, loc=(0, 0, 0), rot=0.0, skin='#f4b48a', shirt='#ff5a1f', pants='#1f48c8', shoes='#f4f4f4', hair='#4a2c1c',
@@ -250,6 +253,10 @@ class Character:
         s.emo_name = 'calm'; s.set_mouth(1, 'smile')
 
     # ---------------- animation API (frames)
+    def show(s, frame, visible):
+        """Show/hide the whole character, incl. eyes, brows and mouth (children of pivots, which parts alone missed)."""
+        for o in s.coll.objects:
+            if o.name.startswith(s.name + '_') and o.type == 'MESH': key_vis(o, frame, visible)
     def pose(s, frame, rots):
         for b, r in rots.items(): pb = s.arm.pose.bones[b]; pb.rotation_euler = Euler(r); pb.keyframe_insert('rotation_euler', frame=frame)
     def place(s, frame, loc, rot=None):
