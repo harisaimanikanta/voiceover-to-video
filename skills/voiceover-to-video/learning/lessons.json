@@ -678,5 +678,21 @@
     "status": "open",
     "hits": 1,
     "history": []
+  },
+  {
+    "id": "L042",
+    "date": "2026-11-22",
+    "last_seen": "2026-11-22",
+    "area": "lighting",
+    "title": "Flat ring-light look, no cast shadows",
+    "symptom": "Even, frontal daylight looked like an influencer ring light: washed colours, no visible shadows of the table or the person, hands blending into the background",
+    "cause": "Several big soft fills from the front, a high ambient level, a low-contrast grade, pastel palette",
+    "fix": "One strong motivated key (sunbeam/lamp) from the side with visible cast shadows, a weak cool fill, low ambient, a saturated complementary palette (teal room vs warm character), a punchy grade",
+    "rule": "Every shot needs a visible cast shadow from the subject and a clear light direction; colours saturated and separated from the background",
+    "source": "user",
+    "check": null,
+    "status": "open",
+    "hits": 1,
+    "history": []
   }
 ]
