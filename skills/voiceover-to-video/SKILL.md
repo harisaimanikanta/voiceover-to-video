@@ -11,6 +11,8 @@ Skill folder: `${CLAUDE_SKILL_DIR}`.
 **Default style: polished 3D feature-animation cartoon** (not brutalist). Rounded, sculpted characters with expressive faces
 (glossy eyes with irises and lids, brows, lips, teeth, 14 emotions, lip-sync). Warm cinematic mood lighting with a key, rim, practical
 lights and haze. Densely dressed rounded sets. Reference: `example/cartoon/` (scene.js, TREATMENT.md, storyboard sheet, demo.mp4).
+Full production reference: `example/dna-case/` (104 s true-crime explainer: 11 sets incl. study, 70s street, bedroom, offices, DNA world, records
+room, family tree, suburb, lab, arrest; host lip-sync, portal map, emotion tracks; sets.js has cars, police props, filing cabinets, portraits…).
 Build with `kit/look.js` (mood, faceRig, soft materials), `kit/toon.js` (cast), `kit/props.js` (cozyRoom/lab/street + props). Worked example (87.7 s, 22 environments): `example/` (scene.js + sets*.js + TREATMENT-v2.md + voiceover.mp3).
 Kit API and gotchas: `references/kit-api.md` (+ `kit/fx.js` particles/beams/camera helpers, `kit/toon.js` cartoon cast with `reach()` IK).
 

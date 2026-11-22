@@ -66,7 +66,13 @@ def main():
             d = float(np.abs(m['small'] - M[i - 1]['small']).mean())
             hd = float(np.abs(m['hist'] - M[i - 1]['hist']).sum())
             m['motion'] = d
-            if hd > 0.9 and d > 0.12: flag(t, 'cut', 'transitions', 'hard cut outside a portal: one-take rule broken', hd)
+    # hard cuts: a one-frame spike in frame difference at 15 fps (a pan changes steadily; a cut jumps once). Lesson L027:
+    # the old histogram test flagged fast pans past saturated props as cuts.
+    small = [f[::6, ::6].mean(2) for f in frames(a.video, 15)]
+    dd = [0.0] + [float(np.abs(small[i] - small[i - 1]).mean()) for i in range(1, len(small))]
+    for i in range(2, len(dd) - 2):
+        t = i / 15; ctx = max(dd[i - 2], dd[i - 1], dd[i + 1], dd[i + 2])
+        if dd[i] > 0.08 and dd[i] > 3.5 * max(ctx, 0.01) and not in_portal(t): flag(t, 'cut', 'transitions', 'hard cut outside a portal: one-take rule broken', dd[i])
     # frozen camera: motion ~0 for >= 1 s outside portals
     still = 0
     for m in M[1:]:
