@@ -149,7 +149,7 @@ export function mood(scene, name = 'day', { sky = true, fog = true, shadowSize =
  * Per-character face rig: a soft key on the face, a strong rim behind the head (silhouette glow), and an eye
  * catchlight. Call rig.update(camera) every frame after posing. This is what makes cartoon faces read on phones.
  */
-export function faceRig(scene, toon, { key = '#fff0de', rim = '#bfe3ff', keyI = 1.4, rimI = 3.0, side = 1 } = {}) {
+export function faceRig(scene, toon, { key = '#fff0de', rim = '#bfe3ff', keyI = 1.4, rimI = 3.0, side = 1, keyY = 0.45 } = {}) {   // keyY < 0 = under-light (villains)
   const k = new THREE.SpotLight(key, keyI, 4, 0.55, 0.9, 1.5), r = new THREE.SpotLight(rim, rimI, 4, 0.6, 0.8, 1.5), c = new THREE.PointLight('#ffffff', 0.08, 1.2, 2);
   scene.add(k, k.target, r, r.target, c);
   const tmp = new THREE.Vector3(), right = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
@@ -158,7 +158,7 @@ export function faceRig(scene, toon, { key = '#fff0de', rim = '#bfe3ff', keyI = 
     update(camera) {
       const h = toon.headWorld(); const toCam = camera.position.clone().sub(h).normalize();
       right.crossVectors(up, toCam).normalize();
-      k.position.copy(h).addScaledVector(toCam, 0.9).addScaledVector(right, 0.55 * side).addScaledVector(up, 0.45); k.target.position.copy(h);
+      k.position.copy(h).addScaledVector(toCam, 0.9).addScaledVector(right, 0.55 * side).addScaledVector(up, keyY); k.target.position.copy(h);
       r.position.copy(h).addScaledVector(toCam, -0.9).addScaledVector(right, -0.6 * side).addScaledVector(up, 0.5); r.target.position.copy(h);
       c.position.copy(h).addScaledVector(toCam, 0.5).addScaledVector(up, 0.08);
     },

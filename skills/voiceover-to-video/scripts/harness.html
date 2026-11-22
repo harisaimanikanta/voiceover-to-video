@@ -32,11 +32,26 @@
     const scene = await mod.setup({ THREE, canvas, width, height });
     const captions = mod.captions || [];      // [{t0, t1, text}]
     const style = Object.assign({ size: 0.062, y: 0.66, color: '#ffffff', stroke: '#000000', font: 'Caption, Inter, sans-serif' }, mod.captionStyle || {});
+    const titles = mod.titles || [];         // [{t0, t1, text, sub?, color?}] key-fact titles (top of frame)
+    window.__warn = []; window.warn = m => window.__warn.push(m);
     window.__duration = mod.duration;
     window.__fps = mod.fps;
     window.renderFrame = async (t) => {
       await scene.render(t);
       ctx.clearRect(0, 0, width, height);
+      const ti = titles.find(c => t >= c.t0 && t < c.t1);
+      if (ti) {   // pop in, hold, fade out
+        const a = Math.min(1, (t - ti.t0) / 0.15, (ti.t1 - t) / 0.2), s = 0.8 + 0.2 * Math.min(1, (t - ti.t0) / 0.15);
+        const px = Math.round((ti.size || 0.085) * width), y = height * (ti.y || 0.14);
+        ctx.save(); ctx.globalAlpha = Math.max(0, a); ctx.translate(width / 2, y); ctx.scale(s, s);
+        ctx.font = `800 ${px}px ${style.font}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        const w = ctx.measureText(ti.text).width + px * 0.9, h = px * 1.35;
+        ctx.fillStyle = ti.color || '#e8613c'; ctx.beginPath(); ctx.roundRect(-w / 2, -h / 2, w, h, h * 0.28); ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.fillText(ti.text, 0, px * 0.04);
+        if (ti.sub) { const sp = Math.round(Math.max(px * 0.5, width * 0.036)); ctx.font = `700 ${sp}px ${style.font}`; ctx.lineWidth = sp * 0.22; ctx.strokeStyle = 'rgba(0,0,0,0.75)'; ctx.lineJoin = 'round';
+          ctx.strokeText(ti.sub, 0, h / 2 + sp * 0.95); ctx.fillText(ti.sub, 0, h / 2 + sp * 0.95); }
+        ctx.restore();
+      }
       const cap = captions.find(c => t >= c.t0 && t < c.t1);
       if (cap && !style.off) {
         const px = Math.round(style.size * width);

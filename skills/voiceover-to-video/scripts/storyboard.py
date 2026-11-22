@@ -35,7 +35,7 @@ def parse_treatment(p):
         at = re.search(r'@(\d+(?:\.\d+)?)', ' '.join(cells))
         clean = lambda s: re.sub(r'\*\*|@\d+(\.\d+)?', '', s).strip()
         rows.append(dict(t=float(at.group(1)) if at else round((a + b) / 2, 2), range=[a, b], vo=clean(cells[1]), visual=clean(cells[2]),
-                         camera=clean(cells[3]) if len(cells) > 3 else '', transition=clean(cells[4]) if len(cells) > 4 else ''))
+                         camera=clean(cells[3]) if len(cells) > 3 else '', transition=clean(cells[4]) if len(cells) > 4 else '', learn=clean(cells[5]) if len(cells) > 5 else ''))
     return rows
 
 
@@ -81,7 +81,7 @@ def main():
     frames = [os.path.join(out, 'out', f"{base}-{js(p['t'])}s.jpg") for p in panels]
 
     # compose pages
-    per = a.cols * a.rows; pad, gap = 70, 44; tw = W; th = H; text_h = 330
+    per = a.cols * a.rows; pad, gap = 70, 44; tw = W; th = H; text_h = 380
     PW = pad * 2 + a.cols * tw + (a.cols - 1) * gap; head = 230
     fT, fS, fN, fTC, fCam, fVO, fVis, fTr = font('black', 64), font('reg', 28), font('black', 40), font('bold', 26), font('bold', 22), font('bold', 27), font('reg', 23), font('bold', 22)
     dur = max(p['range'][1] if p.get('range') else p['t'] for p in panels)
@@ -113,6 +113,8 @@ def main():
                 cam = wrap(d, 'CAMERA · ' + p['camera'], fCam, tw - 44, 1)[0]
                 d.rounded_rectangle([x + 18, ty - 4, x + 26 + d.textlength(cam, font=fCam) + 14, ty + 34], 17, fill='#efe6d8'); d.text((x + 30, ty + 2), cam, font=fCam, fill=INK); ty += 50
             for ln in wrap(d, f"“{p.get('vo', '')}”", fVO, tw - 40, 3): d.text((x + 20, ty), ln, font=fVO, fill=INK); ty += 36
+            if p.get('learn'):   # comprehension: what the viewer must understand from this picture (lesson L031)
+                for ln in wrap(d, 'VIEWER LEARNS: ' + p['learn'], fTr, tw - 40, 2): d.text((x + 20, ty + 4), ln, font=fTr, fill='#1f8a5a'); ty += 30
             ty += 6
             for ln in wrap(d, p.get('visual', ''), fVis, tw - 40, 3): d.text((x + 20, ty), ln, font=fVis, fill=MUTED); ty += 31
             if p.get('transition') and p['transition'] not in ('(continuous)', '-', ''):

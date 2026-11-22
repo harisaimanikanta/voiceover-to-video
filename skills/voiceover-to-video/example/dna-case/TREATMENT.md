@@ -1,48 +1,55 @@
-# Treatment: "Caught by His Cousins' DNA" (103.8 s, one continuous take, polished 3D cartoon)
+# Treatment V3: "Caught by His Cousins' DNA" (103.8 s, one continuous take, clarity first)
 
-Voice: ElevenLabs "Dan - Friendly Relaxed". Tone: friendly true-crime explainer. Violence is only implied (shadows, tambourines,
-baseball bats); the 72-year-old is a generic cartoon character, not a likeness. Host "Dan" (on-screen narrator) lip-syncs the
-opening and closing. 11 environments, joined by portals at the narrator's pauses.
+V2 review (user): there were glitches (the camera entering doors, hands jumping, people clipping tables), and the story could be followed
+from the audio but not from the pictures. The faces were cringy, and the villain was not evil. V3 changes:
+- Every beat literally shows its sentence.
+- Key facts appear as titles.
+- The whole family-tree logic is drawn on one screen, in one room.
+- Fewer camera moves, all chained.
+- Smooth gestures.
+- Subtle acting for normal people and a menacing hooded villain.
 
-| time | VO | visual | camera | out-transition |
-|---|---|---|---|---|
-| 0.0–3.6 | For 40 years, the Golden State Killer was never caught. | Night study: cork "COLD CASE" board, sketch of a masked face, red strings; host Dan turns to us @1.8 | Start tight on the sketch, dolly back and arc to Dan | (continuous) |
-| 4.1–7.3 | Then his cousins turned him in without even knowing it. | Dan points at four smiling family photos on the board that light up; he grins (smug) | Arc around Dan toward the board | (continuous) |
-| 7.7–10.4 | How do you get caught by someone else's DNA test? | Dan lifts a DNA test kit, puzzled then intrigued | Push into the kit in his hand | **into the kit → 1970s night** (10.63) |
-| 10.9–13.7 | The 1970s. California. | Moonlit 70s suburb: retro cars, street lamps, crickets, palm-like trees | High crane down the street toward rooftops | (continuous) |
-| 14.2–16.8 | A masked man is breaking into homes at night. | A dark figure with a flashlight creeps along the pavement to a dark window | Low tracking behind bushes, then push to the window | **through the dark window** (16.9) |
-| 17.1–20.5 | Families tie tambourines to their doors just to hear him coming. | Bedroom: tambourine tied to the doorknob jingles; worried wife clutches the blanket | Glide from the door to the bed | (continuous) |
-| 20.8–22.6 | People sleep with baseball bats. | Husband sits up in bed gripping a baseball bat, eyes darting | Push to the husband | **lamp off → black** (22.79) |
-| 23.0–25.3 | He kills at least 13 people. | 1980s cold-case office: California map, 13 red pins pop in one by one | Slow push along the map | (continuous) |
-| 25.6–30.0 | Then, in 1986, he just stops. Gone. | Wall calendar flips to 1986; the masked cardboard cutout tips over and vanishes; a tired detective sighs | Pan from calendar to detective | (continuous) |
-| 30.3–33.3 | But he left something behind. His DNA. | Desk lamp clicks on over an evidence bag with a cotton swab | Push into the bag | **into the swab → DNA world** (32.18) |
-| 33.5–37.6 | The tiny code inside your body that belongs to you and no one else. | Glowing double helix spirals inside a pastel cell; a unique colour barcode runs along it | Spiral down the helix | **white flash** (37.73) |
-| 37.9–42.3 | One problem. DNA only gives police a name if you're already in their files. | Police records room: rows of filing cabinets; a glowing DNA card flies along drawers searching | Tracking along the cabinets | (continuous) |
-| 42.6–43.3 | He isn't. | Red NO MATCH stamp slams onto the card | Shake on the stamp | (continuous) |
-| 43.6–47.5 | For 30 years, that DNA sits there. Waiting. | Evidence box on a high shelf; clock hands spin, dust falls, cobweb grows | Slow crane up to the box | **dust → 2018** (47.65) |
-| 47.8–52.0 | Then, in 2018, detectives try something no one expects. | Bright modern office: two detectives at a laptop; she gets an idea (surprised → happy) | Arc around the detectives | (continuous) |
-| 52.2–56.4 | They upload the killer's DNA to a free website where people search for long-lost family. | Laptop shows FAMILY FINDER, upload bar fills, DNA particles flow into the screen | Push into the screen | **into the screen → family tree** (56.83) |
-| 57.3–62.8 | He isn't on it, but his cousins are. And family members share pieces of the same DNA. | Giant golden-hour family tree with portrait frames; three cousins wave from a branch; coloured DNA ribbons link them to a blank "?" frame | Fly past the cousins | (continuous) |
-| 63.0–70.9 | So detectives build a giant family tree, back to the 1800s, then forward again, branch by branch, looking for one man. | Down the trunk to sepia 1800s portraits at the roots, then up another limb, frames lighting up branch by branch | Dive down the trunk, then rise | (continuous) |
-| 71.2–73.2 | The right age, the right place. | One frame glows gold | Push into the frame | **into the frame → suburb** (73.31) |
-| 73.5–79.8 | One name is left. Joseph DeAngelo, 72, living quietly near Sacramento. | Sunny suburb: a generic old man waters his lawn, calm | Gentle arc past a mailbox | (continuous) |
-| 80.0–82.4 | Now they need proof, so they watch him. | Detectives peek from behind a van with binoculars | Whip-pan along the street to the van | (continuous) |
-| 82.6–88.2 | He goes shopping, and while he's inside, an officer wipes a cotton swab on his car door handle. | Grocery store; the old man walks in; the officer crouches and swabs the car door handle | Follow, then macro on the handle | **into the swab tip** (88.37) |
-| 88.5–89.4 | It's a match! | Lab monitor: two DNA barcodes slide together, MATCH; detective cheers | Fast push | **red flash** (89.57) |
-| 89.7–96.4 | And the man in handcuffs? He used to be a police officer, until he got fired for stealing a hammer and dog spray. | Dusk driveway, police lights flashing; old man in handcuffs; a police badge and cap float up, then a hammer and a can of dog spray drop in | Pull back from the cuffs to a wide shot, then over to the props | **warm flash → study** (96.5) |
-| 96.6–103.8 | He never gave anyone his DNA. His cousins did. And if your cousins have, part of yours is out there too. | Back in the study: Dan holds the DNA kit; cousin photos glow; DNA sparkles drift toward us; Dan raises a brow at us | Start on the kit, pull back, slow final push to Dan | end |
+| time | VO | visual | camera | out-transition | viewer learns |
+|---|---|---|---|---|---|
+| 0.0–3.6 | For 40 years, the Golden State Killer was never caught. | Dan beside a COLD CASE board with a WANTED poster of a hooded killer | Slow push on Dan and the board | (continuous) | A famous killer escaped for 40 years |
+| 4.1–7.3 | Then his cousins turned him in without even knowing it. | Four family photos pop onto the board; Dan points at them | Hold, gentle push | (continuous) | His own relatives led police to him |
+| 7.7–10.4 | How do you get caught by someone else's DNA test? | Dan lifts a DNA ancestry kit into view | Push onto the kit | into the kit (10.63) | It was about a DNA test |
+| 10.9–13.7 | The 1970s. California. | Night street, 70s cars; a hooded figure walks along the fence | Crane down from above the street | (continuous) | Where and when |
+| 14.2–16.8 | A masked man is breaking into homes at night. | The hooded villain, shadowed face and cold eyes, creeps to a window | Low front angle, then behind him toward the window | dark window (16.9) | A masked intruder breaks into homes |
+| 17.1–22.6 | Families tie tambourines to their doors… People sleep with baseball bats. | A tambourine tied to a doorknob; a worried couple in bed, the husband gripping a bat | Glide from the door to the couple | lamp off (22.79) | People were terrified |
+| 23.0–25.3 | He kills at least 13 people. | California map, 13 red pins appear | Whole map | (continuous) | 13 victims |
+| 25.6–30.0 | Then, in 1986, he just stops. Gone. | The calendar flips to 1986; the detective at his desk; the killer cutout falls and vanishes | Detective and calendar, then to the cutout | (continuous) | The attacks stopped in 1986 |
+| 30.3–33.3 | But he left something behind. His DNA. | Desk lamp on over an evidence bag with a swab | Push into the bag | white (32.18) | Police had his DNA |
+| 33.5–37.6 | The tiny code inside your body that belongs to you and no one else. | DNA double helix | Slow spiral down | white (37.73) | DNA is unique to each person |
+| 37.9–43.3 | One problem. DNA only gives police a name if you're already in their files. He isn't. | Police DNA files: the card searches cabinet drawers; NO MATCH stamp | Track along the cabinets | (continuous) | His DNA matched no one on file |
+| 43.6–47.5 | For 30 years, that DNA sits there. Waiting. | Evidence box on a dusty shelf, clock spinning | Crane up to the box | dust (47.65) | 30 years of nothing |
+| 47.8–56.4 | Then, in 2018, detectives try something no one expects. They upload the killer's DNA to a free website… | Two detectives at a laptop; the big screen shows FamilyFinder uploading "killer's DNA" | Two-shot, then pan to the screen | (continuous) | They used a public family website |
+| 57.3–62.8 | He isn't on it, but his cousins are. And family members share pieces of the same DNA. | Screen: three COUSIN matches; the killer's DNA bar shares a highlighted piece with a cousin's bar | Lower half of the screen | (continuous) | Cousins share DNA with him |
+| 63.0–70.9 | So detectives build a giant family tree, back to the 1800s, then forward again, branch by branch, looking for one man. | Lines climb from the cousins to an 1800s couple, then spread down every branch to today's men; the detective points | Top of the tree, then the whole tree | (continuous) | They traced the family to find every possible man |
+| 71.2–73.2 | The right age, the right place. | All men but one crossed out; THIS MAN circled in gold | Push to the circled man | into the circle (73.31) | Only one man fit |
+| 73.5–79.8 | One name is left. Joseph DeAngelo, 72, living quietly near Sacramento. | An ordinary old man calmly waters his lawn | Gentle arc | (continuous) | The suspect: an ordinary-looking 72-year-old |
+| 80.0–82.4 | Now they need proof, so they watch him. | Detectives with binoculars by a van | Pan across the street | (continuous) | Police watched him |
+| 82.6–88.2 | He goes shopping, and while he's inside, an officer wipes a cotton swab on his car door handle. | @83.8 He parks and walks into the grocery; the officer crouches on the far side of the car and swabs the handle | Follow him, then the officer, then a close-up of the swab | white (88.37) | They secretly took his DNA |
+| 88.5–89.4 | It's a match! | Lab screen: the DNA bars align, MATCH; the detective is pleased | Push in | white (89.57) | His DNA matched the crimes |
+| 89.7–96.4 | And the man in handcuffs? He used to be a police officer, until he got fired for stealing a hammer and dog spray. | Handcuffs on the old man; a detective holds up a 1979 newspaper: OFFICER FIRED, caught shoplifting, hammer and dog spray drawn | From the cuffs to his face, then to the newspaper | warm (96.5) | The killer was a former cop, fired for theft |
+| 96.6–103.8 | He never gave anyone his DNA. His cousins did. And if your cousins have, part of yours is out there too. | Dan with the DNA kit; the cousin photos glow; Dan points at the viewer | Medium shot of Dan, the board, then a slow push to Dan | end | Your relatives' tests expose your DNA too |
 
 ## Lessons applied
-- L006: stills at every segment start, middle and end; no camera inside characters or walls.
-- L007: each portal keeps a lit subject in frame until the fill covers it (kit, window, swab, screen, frame).
-- L008: portal half-widths 0.12–0.25 s, so full cover is under 12 frames.
-- L009: captions are 1–3 words; in-world text (COLD CASE, FAMILY FINDER, MATCH, 1986) is short and inside the 9:16 safe area.
-- L010: the board, calendar, screen and stamp have lettering lit by a raking key or are self-lit screens.
-- L013: all materials use soft() with micro-normals; canvas textures for cork, maps, screens and photos.
-- L014: every set is dressed in foreground, midground and background (props.js presets plus custom props, particles).
-- L015: mood() plus faceRig() on every character, with motivated practicals (lamps, street lamps, monitors, police lights).
-- L016: the storyboard sheet is rendered with storyboard.py and reviewed before the full render.
-- L017: the weakest areas last time were story, transitions and motion: 11 environments with object portals and constant camera moves.
-- L018: polished rounded 3D cartoon style throughout, nothing brutalist.
-- L019: every on-screen character has a beat-specific emotion and posture; Dan lip-syncs to words.json.
-- L020: all outfits (coat, tie, glasses, caps) checked in stills.
+- L006/L032: shots() camera chains plus guardCamera plus lensProbe in QA (zero lens hits); portals fill before contact.
+- L007/L008: lit subject until fill; half-widths 0.12–0.2 s.
+- L009: titles and captions inside the 9:16 safe area; titles 1–4 words with a short sub line.
+- L010: the screen and newspaper lettering is self-lit or key-lit.
+- L013/L014/L015: soft() materials, dressed sets, mood + faceRig on every character, practicals.
+- L016: storyboard sheet with a "viewer learns" line on every panel.
+- L017: beats last run in story (clarity), motion (walks: detective to screen, old man to store, officer approach).
+- L018: polished cartoon look.
+- L019/L035: every line has an emotion, acting at 0.4–0.55 for normal people; villain menacing by design (hood, dead eyes, under-light, red rim).
+- L020: coat, tie, glasses, cap and hood checked in stills.
+- L022: two-shots framed within the 9:16 width.
+- L023: wide stills of every set checked.
+- L024: hero props contrast with backgrounds.
+- L028/L029: chained shots; pans of 1.5 s or longer.
+- L030: police lights glow smoothly.
+- L031: one idea per shot, literal visuals, titles, chart for the mechanism, mute test passed on the storyboard.
+- L033: gestures with env() ramps; the kit is held from the start; IK pole in the character's own frame.
+- L034: hands rest on the laptop at the measured height; the old man walks around the car, not through it.

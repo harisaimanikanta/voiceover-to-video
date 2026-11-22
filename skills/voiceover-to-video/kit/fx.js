@@ -121,3 +121,44 @@ export function guardCamera(pos, toons, radius = 0.45) {
   }
   return p;
 }
+
+/** Smooth envelope 0→1→0 for gestures and props (lesson L033: nothing starts or stops abruptly).
+ *  env(t, start, end, fade=0.35): ramps up over `fade` after start, down over `fade` before end. */
+export function env(t, start, end, fade = 0.35) {
+  const s = x => { x = clamp(x); return x * x * (3 - 2 * x); };
+  return s((t - start) / fade) * s((end - t) / fade);
+}
+
+/**
+ * QA lens probe (lesson L032): warns when the camera is inside or within `min` metres of any prop's bounding box.
+ * Big meshes (rooms, floors, skies; diagonal > maxSize) and objects named 'noProbe' are skipped. Only runs in QA
+ * mode (render.mjs --qa sets window.__qa); results appear in the QA report as "WARN lens …".
+ */
+const _probeCache = new WeakMap();
+export function lensProbe(scene, camera, { min = 0.12, maxSize = 3.5, ignore = [] } = {}) {
+  if (typeof window === 'undefined' || !window.__qa) return;
+  let list = _probeCache.get(scene);
+  if (!list) { list = []; scene.traverse(o => { if (o.isMesh && o.geometry && o.name !== 'noProbe' && o.material && o.material.depthWrite !== false && !o.material.transparent) list.push(o); }); _probeCache.set(scene, list); }
+  const box = new THREE.Box3(), p = camera.position;
+  for (const m of list) {
+    if (!m.visible || ignore.includes(m)) continue;
+    let o = m, vis = true; while (o) { if (!o.visible) { vis = false; break; } o = o.parent; } if (!vis) continue;
+    box.setFromObject(m); const size = box.getSize(new THREE.Vector3()).length(); if (size > maxSize || size < 0.02) continue;
+    if (box.distanceToPoint(p) < min) { window.warn?.(`lens touches ${m.geometry.type} at (${box.getCenter(new THREE.Vector3()).toArray().map(v => v.toFixed(2)).join(', ')})`); }
+  }
+}
+
+/**
+ * Camera as a chain of shots (lesson L028: moves never snap). keys = [{t, pos, at, fov?}, ...]; pos/at are Vector3s or
+ * functions t => Vector3 (to follow moving characters). Between consecutive keys the camera eases in/out; two keys
+ * with the same pos make a hold. Each move starts exactly where the previous one ended, by construction.
+ */
+export function shots(keys) {
+  const V3 = (x, t) => (typeof x === 'function' ? x(t) : x).clone();
+  return t => {
+    let i = 0; while (i + 1 < keys.length - 1 && t >= keys[i + 1].t) i++;
+    const a = keys[i], b = keys[Math.min(i + 1, keys.length - 1)];
+    const k = b === a ? 0 : (x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2)(clamp((t - a.t) / (b.t - a.t)));
+    return { pos: V3(a.pos, t).lerp(V3(b.pos, t), k), at: V3(a.at, t).lerp(V3(b.at, t), k), fov: lerp(a.fov ?? 40, b.fov ?? a.fov ?? 40, k) };
+  };
+}

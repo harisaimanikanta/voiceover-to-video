@@ -37,6 +37,9 @@ export const EMOTIONS = {
   worried: { bi: 0.95, bm: 0.25, bo: -0.35, ul: 0.82, ll: 0.12, lt: -0.35, sm: -0.35, op: 0.1, wd: 0.82, teeth: 1 },
   sick: { bi: 0.6, bo: -0.45, ul: 0.4, ll: 0.3, lt: -0.2, sm: -0.5, op: 0.08, wd: 0.9, as: 0.5 },
   proud: { bi: 0.1, bo: 0.2, ul: 0.55, ll: 0.38, sm: 0.7, op: 0, wd: 1.08, ch: 0.7 },
+  menacing: { bi: -1, bm: -0.45, bo: 0.4, ul: 0.36, ll: 0.55, lt: 0.8, sm: -0.05, op: 0, wd: 0.8, as: 0.25, ch: 0.1 },
+  determined: { bi: -0.35, bm: -0.1, bo: 0.1, ul: 0.7, ll: 0.3, lt: 0.2, sm: -0.05, op: 0, wd: 0.9 },
+  calm: { bi: 0.05, ul: 0.68, ll: 0.25, sm: 0.25, ch: 0.3 },
   embarrassed: { bi: 0.55, bo: -0.15, ul: 0.5, ll: 0.3, lt: -0.15, sm: 0.35, op: 0, wd: 0.85, as: 0.35, bl: 1, gaze: [-0.4, -0.6] },
   // legacy names (v2 API)
   smile: { ul: 0.75, ll: 0.3, sm: 0.7, ch: 0.6 }, grin: 'joy', frown: 'sad', flat: { sm: 0, wd: 0.8 }, o: 'surprised',
@@ -104,7 +107,7 @@ function sculpt(n, p, shape) {
 }
 
 // ---------------------------------------------------------------- character
-export function makeToon({ skin = '#f1c4a0', shirt = '#7aa2e0', pants = '#5b6170', shoes = '#3a2a1e', hair = '#5a3a22', hairStyle = 'tuft',
+export function makeToon({ acting = 0.6, hood = null, catchlights = true, skin = '#f1c4a0', shirt = '#7aa2e0', pants = '#5b6170', shoes = '#3a2a1e', hair = '#5a3a22', hairStyle = 'tuft',
   coat = null, tie = null, glasses = false, moustache = false, eye = '#5a3b20', headScale = 1, lips = null, brows = null, shape = {}, build = 1 } = {}) {
   const skinC = new THREE.Color(skin);
   const M = {
@@ -257,7 +260,7 @@ export function makeToon({ skin = '#f1c4a0', shirt = '#7aa2e0', pants = '#5b6170
       e.tiltU.rotation.z = e.s * p.lt * 0.42 + e.s * 0.04; e.tiltL.rotation.z = -e.s * p.lt * 0.12;
       const gx = gazeSet ? gaze[0] : (p.gaze ? p.gaze[0] : 0), gy = gazeSet ? gaze[1] : (p.gaze ? p.gaze[1] : 0);
       e.ballG.rotation.set(-gy * 0.38, gx * 0.5, 0);
-      const vis = blinkK < 0.6 && p.ul > 0.2; for (const sp of e.sparkles) sp.visible = vis;
+      const vis = catchlights && blinkK < 0.6 && p.ul > 0.2; for (const sp of e.sparkles) sp.visible = vis;
     }
     M.blush.opacity = clamp(p.bl) * 0.7;
   }
@@ -294,6 +297,14 @@ export function makeToon({ skin = '#f1c4a0', shirt = '#7aa2e0', pants = '#5b6170
   }
   if (hairStyle === 'bald') {   // fringe of hair around the back
     for (const s of [-1, 1]) { const m = tubeR([V(s * HR * 0.85, HR * 0.3, HR * 0.15), V(s * HR * 0.95, HR * 0.05, -HR * 0.35), V(s * HR * 0.6, HR * 0.0, -HR * 0.85), V(0, HR * 0.0, -HR * 1.02)].map(v => v.multiplyScalar(1.03)), u => HR * (0.11 * Math.sin(Math.min(1, u * 1.2 + 0.1) * Math.PI) ** 0.5 + 0.01), M.hair, { seg: 24 }); H.add(m); }
+  }
+  if (hood) {   // hooded silhouette: shell around the head, face opening at the front
+    const hm = soft(hood, 'fabric'); const hg = new THREE.SphereGeometry(HR * 1.16, 96, 64), hp = hg.attributes.position, q = new THREE.Vector3(), keep = [];
+    for (let i = 0; i < hp.count; i++) { q.fromBufferAttribute(hp, i).normalize(); const r = sculpt(q, P0, shape) * HR * 1.14 + HR * 0.06 * clamp(q.y + 0.3); hp.setXYZ(i, q.x * r, q.y * r, q.z * r);
+      keep.push(!(q.z > 0.45 && Math.abs(q.x) < 0.62 && q.y < 0.5 && q.y > -0.75) && q.y > -0.95); }
+    const ix = hg.index.array, kept = []; for (let i = 0; i < ix.length; i += 3) if (keep[ix[i]] && keep[ix[i + 1]] && keep[ix[i + 2]]) kept.push(ix[i], ix[i + 1], ix[i + 2]);
+    hg.setIndex(kept); hg.computeVertexNormals(); const hd = new THREE.Mesh(hg, hm); hd.material.side = THREE.DoubleSide; hd.castShadow = true; H.add(hd);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(HR * 0.72, HR * 0.09, 12, 48), hm); rim.scale.set(0.95, 1.12, 0.5); rim.position.set(0, -HR * 0.08, HR * 0.86); H.add(rim);
   }
   if (glasses) {
     for (const e of eyes) { const r = new THREE.Mesh(new THREE.TorusGeometry(ER * 1.35, ER * 0.1, 12, 40), M.black); r.position.copy(e.g.position).add(V(0, 0, ER * 0.85)); H.add(r);
@@ -341,10 +352,12 @@ export function makeToon({ skin = '#f1c4a0', shirt = '#7aa2e0', pants = '#5b6170
   }
 
   const api = {
-    group: root, joints: J, mats: M, head: H, HR,
+    group: root, joints: J, mats: M, head: H, HR, acting,
     /** set the expression: emotion name or params object; k blends from `from`; talk 0..1 opens the jaw (see speech()). */
     face(expr = 'neutral', { k = 1, talk = 0, from = 'neutral' } = {}) {
       const p = k >= 1 ? resolve(expr) : blendEmotion(from, expr, k);
+      // acting intensity (lesson L035): normal people act subtly; villains/cartoon gags pass acting: 1
+      for (const key of ['bi', 'bm', 'bo', 'ul', 'll', 'lt', 'sm', 'op', 'wd', 'pk', 'ch', 'as', 'bl']) p[key] = BASE[key] + (p[key] - BASE[key]) * api.acting;
       if (talk) { p.op = clamp(p.op + talk * (1 - p.op * 0.5)); p.teeth = Math.max(p.teeth, 1); }
       setFace(p); return api;
     },
@@ -381,9 +394,11 @@ export function makeToon({ skin = '#f1c4a0', shirt = '#7aa2e0', pants = '#5b6170
      * Two-bone IK: put the wrist (hand socket) at a WORLD point. pole = world direction the elbow should bend toward.
      * Use for every prop interaction: place the prop where it must be, then reach() its grip point.
      */
-    reach(side, target, pole = new THREE.Vector3(side === 'R' ? -0.6 : 0.6, -1, -0.4)) {
+    reach(side, target, pole = null) {
       const sh = J['shoulder' + side], el = J['elbow' + side];
       root.updateMatrixWorld(true);
+      // pole in the character's own frame (lesson L033: a world-space pole flipped elbows when characters turned)
+      if (!pole) pole = new THREE.Vector3(side === 'R' ? -0.6 : 0.6, -1, -0.5).applyQuaternion(root.getWorldQuaternion(new THREE.Quaternion()));
       const S = sh.getWorldPosition(new THREE.Vector3()), sc = root.getWorldScale(new THREE.Vector3()).x, a = 0.29 * sc, b = 0.27 * sc;
       const d = target.clone().sub(S); let L = d.length(); L = Math.min(Math.max(L, 0.05), a + b - 0.002);
       const dir = d.normalize(), x = (a * a - b * b + L * L) / (2 * L), h = Math.sqrt(Math.max(0, a * a - x * x));

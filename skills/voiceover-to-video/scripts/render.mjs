@@ -65,6 +65,7 @@ const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=sw
 const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
 page.on('pageerror', e => console.error('[page]', e.message));
 page.on('console', m => { if (m.type() === 'error') console.error('[page]', m.text()); });
+if (flags.qa) await page.addInitScript(() => { window.__qa = true; });
 await page.goto(`http://127.0.0.1:${server.address().port}/?scene=${encodeURIComponent(path.basename(scenePath))}&w=${W}&h=${H}`);
 await page.waitForFunction(() => window.__ready || window.__error, null, { timeout: 120000 });
 const err = await page.evaluate(() => window.__error);
@@ -82,6 +83,8 @@ if (flags.qa) {
     const st = await page.evaluate(async t => { await window.renderFrame(t); const c = document.getElementById('c'); const o = document.createElement('canvas'); o.width = 96; o.height = 170;
       const g = o.getContext('2d'); g.drawImage(c, 0, 0, 96, 170); const d = g.getImageData(0, 0, 96, 170).data; let s = 0, s2 = 0, n = 0;
       for (let i = 0; i < d.length; i += 4) { const l = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]; s += l; s2 += l * l; n++; } const m = s / n; return { m, sd: Math.sqrt(Math.max(0, s2 / n - m * m)) }; }, t);
+    const w = await page.evaluate(() => { const w = window.__warn || []; window.__warn = []; return [...new Set(w)]; });
+    for (const m of w) bad.push(`${t.toFixed(2)}s WARN ${m}`);
     const ignored = ign.some(([c, w]) => Math.abs(t - c) < w);
     const flag = st.sd < 9 ? 'FLAT' : st.m < 12 ? 'BLACK' : st.m > 245 ? 'BLOWN' : '';
     if (flag && !ignored) bad.push(`${t.toFixed(2)}s ${flag} mean=${st.m.toFixed(0)} sd=${st.sd.toFixed(1)}`);
