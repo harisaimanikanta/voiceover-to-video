@@ -27,7 +27,8 @@ ev = []
 for a, b, text in lines:
     for x, y in NUM: text = text.replace(x, y)
     for c0, c1, s in chunks(text, a, b): ev.append(f'Dialogue: 0,{ts(c0)},{ts(c1)},Cap,,0,0,0,,{{\\fscx85\\fscy85\\t(0,80,\\fscx100\\fscy100)}}{s}')
-for t0, t1, t, sub in TITLES:
+SHOW_TITLES = False   # user: no orange title pills / sub-lines at the top; only the word captions low in the frame
+for t0, t1, t, sub in (TITLES if SHOW_TITLES else []):
     ev.append(f'Dialogue: 1,{ts(t0)},{ts(t1)},Title,,0,0,0,,{{\\fad(120,150)}}{t}')
     if sub: ev.append(f'Dialogue: 1,{ts(t0)},{ts(t1)},Sub,,0,0,0,,{{\\fad(120,150)}}{sub}')
 ass = f"""[Script Info]
