@@ -20,5 +20,6 @@ for s in a.sets.split(','):
     print(f'== {s} ({time.time() - t0:.0f}s elapsed)', flush=True)
     subprocess.run([a.blender, '-b', '--factory-startup', '-P', os.path.join(HERE, 'dna.py'), '--', '--set', s, '--render', '--engine', a.engine,
                     '--samples', '16' if a.preview else a.samples, '--res', res, '--out', frames, '--device', 'GPU'], check=True)
+subprocess.run([a.blender, '-b', '--factory-startup', '-P', os.path.join(HERE, 'sfx.py')], check=True)   # sound design -> sfx.wav (Blender's Python has numpy)
 subprocess.run([sys.executable, os.path.join(HERE, 'post.py'), frames, a.voice, a.out], check=True)
 print(f'done in {(time.time() - t0) / 60:.1f} min -> {a.out}')

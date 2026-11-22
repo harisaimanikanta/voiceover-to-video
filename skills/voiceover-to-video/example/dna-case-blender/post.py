@@ -48,7 +48,16 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 open(os.path.join(HERE, 'subs.ass'), 'w', encoding='utf-8').write(ass)
 # Windows: a drive letter ("D:") inside the filter string breaks ffmpeg's option parser, so run from HERE and pass a bare file name.
 frames, voice, out = (os.path.abspath(p) for p in (frames, voice, out))
-subprocess.run(['ffmpeg', '-v', 'error', '-y', '-framerate', '30', '-start_number', '1', '-i', os.path.join(frames, '%05d.png'), '-i', voice,
+# Sound: sfx.wav (from sfx.py) sits ~10 dB under the voice and ducks further while the narrator speaks; the mix is normalised to -14 LUFS.
+SFX = os.path.join(HERE, 'sfx.wav'); SFX_DB = -10
+inputs = ['-i', voice] + (['-i', SFX] if os.path.exists(SFX) else [])
+if os.path.exists(SFX):
+    audio = ['-filter_complex', f"[1:a]aformat=sample_rates=48000:channel_layouts=stereo,asplit=2[vo][sc];[2:a]volume={SFX_DB}dB[fx];"
+             "[fx][sc]sidechaincompress=threshold=0.03:ratio=4:attack=25:release=450[fxd];"
+             "[vo][fxd]amix=inputs=2:normalize=0:duration=first,loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[aout]", '-map', '0:v', '-map', '[aout]']
+else:
+    audio = ['-af', 'loudnorm=I=-14:TP=-1.5:LRA=11', '-map', '0:v', '-map', '1:a']
+subprocess.run(['ffmpeg', '-v', 'error', '-y', '-framerate', '30', '-start_number', '1', '-i', os.path.join(frames, '%05d.png')] + inputs + audio + [
                 # 93.4-96.45: the 1979 shoplifting flashback in black & white with film grain and a vignette (titles stay in colour)
                 '-vf', "scale=1080:1920:flags=lanczos,hue=s=0:enable='between(t,93.4,96.45)',noise=alls=14:allf=t+u:enable='between(t,93.4,96.45)',"
                        "vignette=PI/4:enable='between(t,93.4,96.45)',ass=subs.ass,format=yuv420p", '-c:v', 'libx264', '-crf', '18', '-preset', 'medium',
