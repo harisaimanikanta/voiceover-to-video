@@ -103,3 +103,21 @@ export function shake(t, t0, dur = 0.35, amt = 0.05) {
 }
 /** Bell curve 0→1→0 centred at c with half-width w (for fills / zoom blur at transitions). */
 export const bell = (t, c, w) => { const x = (t - c) / w; return Math.abs(x) >= 1 ? 0 : 0.5 + 0.5 * Math.cos(x * Math.PI); };
+
+/**
+ * Lens safety (lesson L006): push a camera position out of every character's body capsule (feet → head axis).
+ * Call after computing the camera position each frame: pos = guardCamera(pos, [toonA, toonB], 0.45).
+ * Characters must be makeToon() instances (they expose group + headWorld()).
+ */
+export function guardCamera(pos, toons, radius = 0.45) {
+  const p = pos.clone();
+  for (const c of toons) {
+    if (!c || !c.group.visible || !c.group.parent) continue;
+    const s = c.group.getWorldScale(new THREE.Vector3()).x;
+    const a = c.group.getWorldPosition(new THREE.Vector3()), b = c.headWorld();
+    const ab = b.clone().sub(a), k = clamp(p.clone().sub(a).dot(ab) / ab.lengthSq());
+    const q = a.clone().addScaledVector(ab, k), d = p.clone().sub(q), r = radius * s;
+    if (d.length() < r) p.copy(q).add(d.lengthSq() > 1e-8 ? d.normalize().multiplyScalar(r) : new THREE.Vector3(0, 0, r));
+  }
+  return p;
+}

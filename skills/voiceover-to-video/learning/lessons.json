@@ -87,7 +87,7 @@
   {
     "id": "L006",
     "date": "2026-11-21",
-    "last_seen": "2026-11-21",
+    "last_seen": "2026-11-22",
     "area": "camera",
     "title": "Camera passes through a character",
     "symptom": "Frame filled with the inside of a head/body for a few frames",
@@ -96,9 +96,15 @@
     "rule": "Render a still at every camera key and midpoint; nothing may intersect the lens",
     "source": "self",
     "check": null,
-    "status": "open",
-    "hits": 1,
-    "history": []
+    "status": "enforced",
+    "hits": 2,
+    "history": [
+      {
+        "date": "2026-11-22",
+        "note": "GSK: camera pushed through detective (case office) and officer (swab); 9:16 framing"
+      }
+    ],
+    "where": "kit/fx.js guardCamera() (used every frame)"
   },
   {
     "id": "L007",
@@ -331,5 +337,104 @@
     "status": "open",
     "hits": 1,
     "history": []
+  },
+  {
+    "id": "L021",
+    "date": "2026-11-22",
+    "last_seen": "2026-11-22",
+    "area": "render",
+    "title": "Too many shadow-casting lights",
+    "symptom": "Shader error: texture image units exceed 32; materials fail to compile",
+    "cause": "Every house window in street() created a shadow-casting spot light (about 40)",
+    "fix": "windowFrame only adds a light when intensity > 0; shadow optional",
+    "rule": "At most ~6 shadow-casting lights per scene; decorative emitters never cast shadows",
+    "source": "self",
+    "check": null,
+    "status": "enforced",
+    "hits": 1,
+    "history": [],
+    "where": "kit/props.js windowFrame"
+  },
+  {
+    "id": "L022",
+    "date": "2026-11-22",
+    "last_seen": "2026-11-22",
+    "area": "composition",
+    "title": "Characters fall outside the 9:16 frame",
+    "symptom": "Detectives at a desk were cut off; only the laptop was visible",
+    "cause": "Portrait frame is only ~0.9 m wide at 2.3 m; characters were spaced like a 16:9 shot",
+    "fix": "Group characters within 0.35 x distance; put them behind the desk facing the camera",
+    "rule": "Check every two-shot still in 9:16: all faces must be inside the frame with headroom",
+    "source": "self",
+    "check": null,
+    "status": "open",
+    "hits": 1,
+    "history": []
+  },
+  {
+    "id": "L023",
+    "date": "2026-11-22",
+    "last_seen": "2026-11-22",
+    "area": "sets",
+    "title": "Ground mesh buried the set",
+    "symptom": "Hill rose 3 m and hid the trunk and root portraits",
+    "cause": "Scaled sphere placed without computing its top height",
+    "fix": "Place ground domes so their top sits at y = 0",
+    "rule": "After building a set, render a wide still of the whole set before choreographing",
+    "source": "self",
+    "check": null,
+    "status": "open",
+    "hits": 1,
+    "history": []
+  },
+  {
+    "id": "L024",
+    "date": "2026-11-22",
+    "last_seen": "2026-11-22",
+    "area": "materials",
+    "title": "Prop the same colour as its background",
+    "symptom": "Tambourine skin vanished against a cream door",
+    "cause": "Prop and background shared a hue and value",
+    "fix": "Contrasting colour plus a painted design",
+    "rule": "Hero props must contrast in value or hue with what is behind them",
+    "source": "self",
+    "check": null,
+    "status": "open",
+    "hits": 1,
+    "history": []
+  },
+  {
+    "id": "L025",
+    "date": "2026-11-22",
+    "last_seen": "2026-11-22",
+    "area": "storyboard",
+    "title": "Storyboard page with one panel",
+    "symptom": "Page 3 held a single panel",
+    "cause": "Fixed 12 panels per page",
+    "fix": "storyboard.py balances panels evenly across pages",
+    "rule": "Storyboard pages are balanced",
+    "source": "self",
+    "check": null,
+    "status": "enforced",
+    "hits": 1,
+    "history": [],
+    "where": "scripts/storyboard.py page balancing"
+  },
+  {
+    "id": "L026",
+    "date": "2026-11-22",
+    "last_seen": "2026-11-22",
+    "area": "pipeline",
+    "title": "No script given",
+    "symptom": "Only audio was provided; the skill told me to ask for the script",
+    "cause": "No offline transcription step",
+    "fix": "scripts/transcribe.py (sherpa-onnx Whisper from GitHub) plus number spelling for the aligner",
+    "rule": "Transcribe the audio yourself; ask only if that fails",
+    "source": "self",
+    "check": null,
+    "status": "enforced",
+    "hits": 1,
+    "history": [],
+    "where": "scripts/transcribe.py + SKILL.md step 1"
   }
 ]

@@ -57,7 +57,7 @@ export function soft(color, kind = 'plastic', o = {}) {
   const { n, ns, rep, ...p } = base;
   const m = new THREE.MeshPhysicalMaterial({ color, ...p, ...o });
   if (n) { m.normalMap = detailNormal(n).clone(); m.normalMap.needsUpdate = true; m.normalMap.repeat.set(rep, rep); m.normalScale.set(ns, ns); }
-  if (kind === 'skin') m.sheenColor = new THREE.Color(o.sheenColor || '#ff7a5c');
+  if (kind === 'skin') { const c = new THREE.Color(color); m.sheenColor = new THREE.Color(o.sheenColor || c.clone().lerp(new THREE.Color('#ff7a5c'), c.getHSL({}).l > 0.25 ? 0.6 : 0.1)); }
   if (kind === 'fabric') m.sheenColor = new THREE.Color(color).offsetHSL(0, -0.1, 0.25);
   return m;
 }

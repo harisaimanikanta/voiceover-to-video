@@ -113,13 +113,14 @@ export function pictureFrame({ w = 0.5, h = 0.4, art = null, frame = '#4a3020', 
   const p = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.82, h * 0.78), soft('#ffffff', 'paper', { map: tex })); p.position.z = 0.021; g.add(p);
   return g;
 }
-export function windowFrame({ w = 1.2, h = 1.4, frame = '#f4efe6', sky = ['#8cc8f0', '#fff0d0'], light = '#fff2d6', intensity = 3 } = {}) {
+export function windowFrame({ w = 1.2, h = 1.4, frame = '#f4efe6', sky = ['#8cc8f0', '#fff0d0'], light = '#fff2d6', intensity = 3, shadow = true } = {}) {
   const g = new THREE.Group(), m = soft(frame, 'plastic');
   const tex = canvasTex(256, 256, (c, W, H) => { const gr = c.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, sky[0]); gr.addColorStop(1, sky[1]); c.fillStyle = gr; c.fillRect(0, 0, W, H);
-    c.fillStyle = 'rgba(255,255,255,0.85)'; for (const [x, y, s] of [[60, 70, 30], [180, 50, 22], [130, 120, 18]]) { for (let k = 0; k < 4; k++) { c.beginPath(); c.arc(x + k * s * 0.6, y + (k % 2) * 6, s * (0.7 + (k % 2) * 0.3), 0, 7); c.fill(); } } });
+    c.fillStyle = 'rgba(255,255,255,0.85)'; if (new THREE.Color(sky[0]).getHSL({}).l > 0.35) for (const [x, y, s] of [[60, 70, 30], [180, 50, 22], [130, 120, 18]]) { for (let k = 0; k < 4; k++) { c.beginPath(); c.arc(x + k * s * 0.6, y + (k % 2) * 6, s * (0.7 + (k % 2) * 0.3), 0, 7); c.fill(); } } });
   const pane = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex })); g.add(pane);
   for (const [x, y, ww, hh] of [[0, h / 2, w + 0.1, 0.08], [0, -h / 2, w + 0.16, 0.1], [-w / 2, 0, 0.08, h], [w / 2, 0, 0.08, h], [0, 0, 0.04, h], [0, 0, w, 0.04]]) g.add(at(roundBox(ww, hh, 0.08, m, 0.015), x, y, 0.03));
-  const sun = new THREE.SpotLight(light, intensity * 6, 8, 0.6, 0.6, 1.2); sun.position.set(0, 0.3, 0.5); sun.target.position.set(0.4, -2.2, 3); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
+  if (intensity <= 0) return g;   // decorative window (houses): no light - every shadow-casting light costs a texture unit (lesson L021)
+  const sun = new THREE.SpotLight(light, intensity * 6, 8, 0.6, 0.6, 1.2); sun.position.set(0, 0.3, 0.5); sun.target.position.set(0.4, -2.2, 3); sun.castShadow = shadow; sun.shadow.mapSize.set(1024, 1024);
   g.add(sun, sun.target); g.userData.light = sun; return g;
 }
 export function clock(color = '#f2a541') {

@@ -85,6 +85,7 @@ def main():
     PW = pad * 2 + a.cols * tw + (a.cols - 1) * gap; head = 230
     fT, fS, fN, fTC, fCam, fVO, fVis, fTr = font('black', 64), font('reg', 28), font('black', 40), font('bold', 26), font('bold', 22), font('bold', 27), font('reg', 23), font('bold', 22)
     dur = max(p['range'][1] if p.get('range') else p['t'] for p in panels)
+    per = -(-len(panels) // -(-len(panels) // per))   # balance pages (never leave one lonely panel on the last page)
     pages = [panels[i:i + per] for i in range(0, len(panels), per)]
     written = []
     for pi, page in enumerate(pages):

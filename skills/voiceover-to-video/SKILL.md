@@ -40,7 +40,10 @@ runs.jsonl = scorecard of every past video; bar.json = the quality floor, which 
 
 ## Workflow
 0. **Memory first:** `learn.py brief` (above).
-1. **Get the script text.** If the user gave only audio, ask for the script (or the text they fed the TTS). Keep stage tags like `[PAUSE]` - align.py strips them.
+1. **Get the script text.** If the user gave a script, use it (keep stage tags like `[PAUSE]` - align.py strips them). If they gave only audio,
+   transcribe it yourself: `python3 ${CLAUDE_SKILL_DIR}/scripts/transcribe.py voice.mp3 <workdir>` (offline Whisper; pip install sherpa-onnx).
+   It writes `script.txt` with numbers spelled out for the aligner, plus `numbers.json` for restoring digits in captions. Fix names by hand.
+   Ask for the script only if transcription is impossible.
 2. **Analyse the voice:** `python3 ${CLAUDE_SKILL_DIR}/scripts/align.py voice.mp3 script.txt <workdir>` → `words.json`, `lines.json`, `beats.json`
    (pauses > 0.3 s = transition slots; accents = stressed words). Read the output twice before designing.
 3. **Treatment first** (`<workdir>/TREATMENT.md`, same table format as `example/TREATMENT-v2.md`): for every line → what we SEE (literal + creative
@@ -73,3 +76,6 @@ runs.jsonl = scorecard of every past video; bar.json = the quality floor, which 
   eyes on what matters, hands busy (`reach`/`grip`). Faces are the story: hold medium close-ups on emotional beats, with the head in the upper third and headroom.
 - **Look:** `mood()` + `faceRig()` on every set, all materials via `soft()`, sets dressed with `props.js` (foreground, midground and background), dust in light beams.
 - Walks use `toon.walkDist(metresTravelled)` so feet never slide.
+- **9:16 is narrow:** at 2.3 m the frame is only ~0.9 m wide. Keep a two-shot within 0.35 × camera distance, put characters facing the camera
+  (behind desks, not in front of them), and never route a camera move through anyone (render the midpoints).
+- **Real people and crimes:** imply violence (shadows, props, reactions) and never show it. Real people are generic cartoons, not likenesses.
